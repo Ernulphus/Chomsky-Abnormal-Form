@@ -6,7 +6,11 @@
 ### Idea: create an app similar to [Evan Wallace's FSM designer](https://madebyevan.com/fsm/) that the user can actually run.  
 
 ### MVP: User can design a nondeterministic finite state machine and submit strings in the language to run on it. Site is hosted.  
+  - [ ] Site displays a diagram canvas and stores an object representing the machine
+  - [ ] Creating a state in the diagram updates representation of the machine
+  - [ ] Button to submit a string to be run on the machine
   
+### Other goals
 - [ ] Convert to/from deterministic FAs (HMU 2.3.5)
 - [ ] Convert to/from regular expressions (HMU 3.2)
 - [ ] State minimization (HMU 4.4.3)
