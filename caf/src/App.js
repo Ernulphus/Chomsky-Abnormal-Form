@@ -3,8 +3,8 @@ import './App.css';
 import React, {Component} from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom';
 
-import nfadiagram from './components/nfadiagram.js';
 import Home from './components/Home.js';
+import Nfadiagram from './components/nfadiagram.js';
 
 function App() {
 
@@ -13,9 +13,8 @@ function App() {
   )
 
   const nfadiagramComponent = () => (
-    <nfadiagram />
+    <Nfadiagram />
   )
-
 
   return (
     <div className="App">
