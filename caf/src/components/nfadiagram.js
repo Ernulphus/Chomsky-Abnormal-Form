@@ -3,15 +3,19 @@ import Canvas from './Canvas'
 
 const Nfadiagram = (props) => {
 
-  const draw = (ctx, frameCount) => {
+  const draw = (ctx) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     ctx.fillStyle = '#000000'
-    ctx.beginPath()
-    ctx.arc(50, 100, 20*Math.sin(frameCount*0.05)**2, 0, 2*Math.PI)
-    ctx.fill()
+
   }
 
-  return <Canvas draw={draw}/>
+  return (
+    <div>
+      <h2>Draw a diagram!</h2>
+      <h3>Double-click to create a new state.</h3>
+      <Canvas draw={draw}/>
+    </div>
+  )
 }
 
 export default Nfadiagram
