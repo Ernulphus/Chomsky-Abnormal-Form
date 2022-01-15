@@ -15,6 +15,7 @@ const Nfadiagram = (props) => {
     }
   );
   const [selected, updateSelected] = useState();
+  let movingState = null;
 
   const distance = (x1, x2, y1, y2) => {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -36,7 +37,7 @@ const Nfadiagram = (props) => {
     machine.Q.forEach((value, key) => {
         ctx.beginPath();
         ctx.arc(value[0], value[1], machine.stateRadius, 0, Math.PI * 2, true);
-        if (key == selected){
+        if (key === selected){
           ctx.fillStyle = '#99AAFF'; // Color of selected state
           ctx.fill();
           ctx.fillStyle = '#111188';
@@ -58,7 +59,6 @@ const Nfadiagram = (props) => {
     switch (e.detail) {
       case 1:
         updateSelected(nearbyState(canvX, canvY));
-        console.log(e);
         break;
       case 2:
         // Create a new state at the location of the double click
@@ -72,11 +72,26 @@ const Nfadiagram = (props) => {
     }
   };
 
+  let handleMouseMove = (e) => {
+    let canvX = e.clientX - e.target.offsetLeft;  // X position on canvas of click
+    let canvY = e.clientY - e.target.offsetTop;   // Y position on canvas of click
+    if (e.buttons === 1) {
+      let clicked = nearbyState(canvX, canvY);
+      if (clicked === selected) {
+        console.log(e);
+        let x = machine.Q.get(clicked)[0];
+        let y = machine.Q.get(clicked)[1];
+        // machine.Q.set(clicked, [x + e.movementX, y + e.movementY]);
+        machine.Q.set(clicked, [canvX, canvY]);
+      }
+    }
+  }
+
   return (
     <div>
       <h2>Draw a diagram!</h2>
       <h3>Double-click to create a new state.</h3>
-      <Canvas draw={draw} onClick={handleClick}/>
+      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove}/>
     </div>
   )
 }
