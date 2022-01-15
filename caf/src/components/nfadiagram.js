@@ -36,6 +36,8 @@ const Nfadiagram = (props) => {
         break;
       case 2:
         console.log(e);
+        machine.Q.set("q" + machine.Q.size, [e.clientX - e.target.offsetLeft, e.clientY - e.target.offsetTop]);
+        console.log(machine);
         break;
       case 3:
         console.log("triple click");
