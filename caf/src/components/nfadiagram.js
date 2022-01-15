@@ -16,19 +16,19 @@ const Nfadiagram = (props) => {
   );
   const [selected, updateSelected] = useState();
 
-  const selectNear = (x, y) => {
-    let nearest = selected;
+  const distance = (x1, x2, y1, y2) => {
+    return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+  }
+
+  const nearbyState = (x, y) => {
+    let nearest = null;
     machine.Q.forEach( (value, key) => {
-      if (Math.sqrt(Math.pow(value[0] - x, 2) + Math.pow(value[1] - y, 2)) < machine.stateRadius){
+      if (distance(value[0], x, value[1], y) < machine.stateRadius){
         nearest = key;
       }
     })
-    if (nearest == selected) {
-      updateSelected("");
-    }
-    else {
-      updateSelected(nearest);
-    }
+    return nearest;
+
   }
 
   const draw = (ctx) => {
@@ -49,7 +49,7 @@ const Nfadiagram = (props) => {
         ctx.textAlign = "center";
         ctx.font = (machine.stateRadius) + "px serif";
         ctx.fillText(key, value[0], value[1]);
-    })
+    }) // End forEach
   }
 
   const handleClick = (e) => {
@@ -57,7 +57,7 @@ const Nfadiagram = (props) => {
     let canvY = e.clientY - e.target.offsetTop;   // Y position on canvas of click
     switch (e.detail) {
       case 1:
-        selectNear(canvX, canvY);
+        updateSelected(nearbyState(canvX, canvY));
         console.log(e);
         break;
       case 2:
