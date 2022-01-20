@@ -46,10 +46,15 @@ const Nfadiagram = (props) => {
           ctx.fillStyle = '#000000';
           ctx.stroke();
         }
+        if (machine.F.includes(key)){
+          ctx.beginPath();
+          ctx.arc(value[0], value[1], machine.stateRadius * 0.8, 0, Math.PI * 2, true)
+          ctx.stroke();
+        }
         ctx.moveTo(value[0] - machine.stateRadius, value[1] - machine.stateRadius);
         ctx.textAlign = "center";
         ctx.font = (machine.stateRadius) + "px serif";
-        ctx.fillText(key, value[0], value[1]);
+        ctx.fillText(key, value[0], value[1] + 5);
     }) // End forEach
   }
 
@@ -61,11 +66,22 @@ const Nfadiagram = (props) => {
         updateSelected(nearbyState(canvX, canvY));
         break;
       case 2:
-        // Create a new state at the location of the double click
-        machine.Q.set("q" + machine.Q.size, [canvX, canvY]);
+        if (selected){
+          let index = machine.F.indexOf(selected);
+          if (index > -1){
+            machine.F.splice(index, 1);
+          }
+          else{
+            machine.F.push(selected);
+          }
+        }
+        else {
+          // If no state is selected,
+          // Create a new state at the location of the double click
+          machine.Q.set("q" + machine.Q.size, [canvX, canvY]);
+        }
         break;
       case 3:
-        console.log("triple click");
         break;
       default:
         return;
@@ -78,20 +94,22 @@ const Nfadiagram = (props) => {
     if (e.buttons === 1) {
       let clicked = nearbyState(canvX, canvY);
       if (clicked === selected) {
-        console.log(e);
         let x = machine.Q.get(clicked)[0];
         let y = machine.Q.get(clicked)[1];
-        // machine.Q.set(clicked, [x + e.movementX, y + e.movementY]);
         machine.Q.set(clicked, [canvX, canvY]);
       }
     }
+  }
+
+  let handleKeyPress = (e) => {
+    console.log(e);
   }
 
   return (
     <div>
       <h2>Draw a diagram!</h2>
       <h3>Double-click to create a new state.</h3>
-      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove}/>
+      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove} onKeyPress={handleKeyPress}/>
     </div>
   )
 }
