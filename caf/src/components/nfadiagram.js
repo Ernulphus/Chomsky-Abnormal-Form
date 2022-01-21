@@ -29,7 +29,6 @@ const Nfadiagram = (props) => {
       }
     })
     return nearest;
-
   }
 
   const draw = (ctx) => {
@@ -63,7 +62,18 @@ const Nfadiagram = (props) => {
     let canvY = e.clientY - e.target.offsetTop;   // Y position on canvas of click
     switch (e.detail) {
       case 1:
-        updateSelected(nearbyState(canvX, canvY));
+        // alt click to 'delete' the selected state
+        if (e.altKey && selected){
+          // To not fuck things up, move this state to last state and delete last state
+          machine.Q.set(selected, machine.Q.get("q" + (machine.Q.size - 1)));
+          console.log("deleting");
+          machine.Q.delete("q" + (machine.Q.size - 1));
+          updateSelected(null);
+
+        }
+        else {
+          updateSelected(nearbyState(canvX, canvY));
+        }
         break;
       case 2:
         if (selected){
@@ -93,23 +103,29 @@ const Nfadiagram = (props) => {
     let canvY = e.clientY - e.target.offsetTop;   // Y position on canvas of click
     if (e.buttons === 1) {
       let clicked = nearbyState(canvX, canvY);
-      if (clicked === selected) {
-        let x = machine.Q.get(clicked)[0];
-        let y = machine.Q.get(clicked)[1];
-        machine.Q.set(clicked, [canvX, canvY]);
+      if (e.shiftKey){
+        let dest;
+      }
+      else{
+        if (clicked === selected) {
+          let x = machine.Q.get(clicked)[0];
+          let y = machine.Q.get(clicked)[1];
+          machine.Q.set(clicked, [canvX, canvY]);
+        }
       }
     }
-  }
-
-  let handleKeyPress = (e) => {
-    console.log(e);
   }
 
   return (
     <div>
       <h2>Draw a diagram!</h2>
-      <h3>Double-click to create a new state.</h3>
-      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove} onKeyPress={handleKeyPress}/>
+      <h3>
+        Double-click to create a new state. <br />
+        Click on a state to select it. <br />
+        Double-click a selected state to make it an accepting state. <br />
+        Alt-click a selected state to delete it.
+      </h3>
+      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove}/>
     </div>
   )
 }
