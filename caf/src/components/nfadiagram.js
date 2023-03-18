@@ -8,10 +8,11 @@ const Nfadiagram = (props) => {
   const [machine, updateMachine] = useState(
     {
       Q: states,
-      Sigma: [],
+      Sigma: ["a", "b"],
+      Delta: [],
       q0: "q0",
       F: [],
-      stateRadius: 30
+      stateRadius: 30 // This should prob just be a const but it would be too annoying to change
     }
   );
   const [selected, updateSelected] = useState();
@@ -69,7 +70,14 @@ const Nfadiagram = (props) => {
           console.log("deleting");
           machine.Q.delete("q" + (machine.Q.size - 1));
           updateSelected(null);
-
+        }
+        else if (e.shiftKey && selected){
+          // Create a transition to another statek
+          let dest = nearbyState(canvX,canvY);
+          if (dest){
+            machine.Delta.push({[selected] : {[machine.Sigma[0]] : dest}});
+            console.log(machine.Delta);
+          }
         }
         else {
           updateSelected(nearbyState(canvX, canvY));
@@ -103,15 +111,10 @@ const Nfadiagram = (props) => {
     let canvY = e.clientY - e.target.offsetTop;   // Y position on canvas of click
     if (e.buttons === 1) {
       let clicked = nearbyState(canvX, canvY);
-      if (e.shiftKey){
-        let dest;
-      }
-      else{
-        if (clicked === selected) {
-          let x = machine.Q.get(clicked)[0];
-          let y = machine.Q.get(clicked)[1];
-          machine.Q.set(clicked, [canvX, canvY]);
-        }
+      if (clicked === selected) {
+        let x = machine.Q.get(clicked)[0];
+        let y = machine.Q.get(clicked)[1];
+        machine.Q.set(clicked, [canvX, canvY]);
       }
     }
   }
