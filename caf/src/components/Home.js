@@ -10,6 +10,7 @@ class Home extends Component {
         <h2 class="Home-links">
         <div>
         <Link to="/nfadiagram">NFA Diagram Maker</Link>
+        <Link to="/regex">Regex Evaluator</Link>
         </div>
         </h2>
 
