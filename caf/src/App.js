@@ -1,6 +1,6 @@
 import './App.css';
 import React, {Component} from 'react';
-import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import {BrowserRouter, Route, Routes, Navigate} from 'react-router-dom';
 
 import Home from './components/Home.js';
 import Nfadiagram from './components/nfadiagram.js';
@@ -26,7 +26,8 @@ function App() {
         <Routes>
           <Route exact path="/" element={HomeComponent()}/>
           <Route exact path="/nfadiagram" element={nfadiagramComponent()}/>
-          <Route exact path="/regex" render={RegexComponent()}/>
+          <Route exact path="/regex" element={RegexComponent()}/>
+          <Route path="*" element={<Navigate to="/" />}/>
         </Routes>
       </BrowserRouter>
     </div>

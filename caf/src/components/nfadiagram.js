@@ -8,10 +8,10 @@ const Nfadiagram = (props) => {
   const [machine, updateMachine] = useState(
     {
       Q: states,
-      Sigma: ["a", "b"],
-      Delta: [],
-      q0: "q0",
-      F: [],
+      Sigma: ["a", "b"], // Alphabet of the language
+      Delta: [], // Transition function
+      q0: "q0", // Initial state
+      F: [], // Accept states
       stateRadius: 30 // This should prob just be a const but it would be too annoying to change
     }
   );
@@ -72,11 +72,12 @@ const Nfadiagram = (props) => {
           updateSelected(null);
         }
         else if (e.shiftKey && selected){
-          // Create a transition to another statek
+          // Create a transition to another state
           let dest = nearbyState(canvX,canvY);
           if (dest){
             machine.Delta.push({[selected] : {[machine.Sigma[0]] : dest}});
             console.log(machine.Delta);
+            console.log("Adding transition")
           }
         }
         else {
@@ -109,26 +110,28 @@ const Nfadiagram = (props) => {
   let handleMouseMove = (e) => {
     let canvX = e.clientX - e.target.offsetLeft;  // X position on canvas of click
     let canvY = e.clientY - e.target.offsetTop;   // Y position on canvas of click
-    if (e.buttons === 1) {
-      let clicked = nearbyState(canvX, canvY);
-      if (clicked === selected) {
-        let x = machine.Q.get(clicked)[0];
-        let y = machine.Q.get(clicked)[1];
-        machine.Q.set(clicked, [canvX, canvY]);
-      }
+    if (e.buttons === 2 && selected) {
+      machine.Q.set(selected, [canvX, canvY]);
     }
+  }
+
+  let handleContextMenu = (e) => {
+    e.preventDefault();
   }
 
   return (
     <div>
       <h2>Draw a diagram!</h2>
+      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove} onContextMenu={handleContextMenu} />
       <h3>
         Double-click to create a new state. <br />
         Click on a state to select it. <br />
         Double-click a selected state to make it an accepting state. <br />
-        Alt-click a selected state to delete it.
+        Alt-click a selected state to delete it. <br />
+        Shift-click a state to add a transition from the selected state. <br />
+        Right-click and drag to move the selected state.
       </h3>
-      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove}/>
+      
     </div>
   )
 }
