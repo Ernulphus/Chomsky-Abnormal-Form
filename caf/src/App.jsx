@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 
 import Home from './components/Home';
-import NFADiagram from './components/nfadiagram';
+import NFADiagram from './components/NFADiagram';
 import Regex from './components/Regex';
 
 function App() {
