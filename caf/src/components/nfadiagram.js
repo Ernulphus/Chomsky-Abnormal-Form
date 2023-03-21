@@ -9,13 +9,15 @@ const Nfadiagram = (props) => {
     {
       Q: states,
       Sigma: ["a", "b"], // Alphabet of the language
-      Delta: [], // Transition function
+      Delta: {}, // Transition function
       q0: "q0", // Initial state
       F: [], // Accept states
       stateRadius: 30 // This should prob just be a const but it would be too annoying to change
     }
   );
   const [selected, updateSelected] = useState();
+  const [qName, updateQName] = useState("");
+  const [enteringName, updateEnteringName] = useState(false);
   let movingState = null;
 
   const distance = (x1, x2, y1, y2) => {
@@ -75,7 +77,7 @@ const Nfadiagram = (props) => {
           // Create a transition to another state
           let dest = nearbyState(canvX,canvY);
           if (dest){
-            machine.Delta.push({[selected] : {[machine.Sigma[0]] : dest}});
+            machine.Delta.set(selected[machine.Sigma[0]].push(dest));
             console.log(machine.Delta);
             console.log("Adding transition")
           }
@@ -115,6 +117,23 @@ const Nfadiagram = (props) => {
     }
   }
 
+  let handleKeyPress = (e) => {
+    console.log(e.key)
+    if (e.key === "Enter" && selected) {
+      if (!enteringName) {updateEnteringName(true);}
+      else {
+        console.log(machine.Q.get(selected))
+        machine.Q.set(qName, machine.Q.get(selected));
+        machine.Q.delete(selected)
+        updateEnteringName(false)
+      }
+    }
+    else if (enteringName) {
+      updateQName(qName + e.key);
+      console.log(qName)
+    }
+  }
+
   let handleContextMenu = (e) => {
     e.preventDefault();
   }
@@ -122,7 +141,7 @@ const Nfadiagram = (props) => {
   return (
     <div>
       <h2>Draw a diagram!</h2>
-      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove} onContextMenu={handleContextMenu} />
+      <Canvas draw={draw} onClick={handleClick} onMouseMove={handleMouseMove} tabIndex="0" onContextMenu={handleContextMenu} onKeyPress={handleKeyPress}/>
       <h3>
         Double-click to create a new state. <br />
         Click on a state to select it. <br />
