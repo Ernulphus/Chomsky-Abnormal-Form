@@ -7,12 +7,12 @@ export default class Machine {
     const {
       states = ['q0'],
       alphabet = ['a', 'b'],
-      transitionFunction = [],
+      transitionFunction = {},
       acceptStates = [],
     } = params;
     this.states = (states ? [...states] : ['q0']);
     this.alphabet = (alphabet ? [...alphabet] : ['a', 'b']);
-    this.transitionFunction = (transitionFunction ? [...transitionFunction] : []);
+    this.transitionFunction = (transitionFunction ? {...transitionFunction} : {});
     this.acceptStates = (acceptStates ? [...acceptStates] : []);
   }
 
@@ -34,5 +34,18 @@ export default class Machine {
   hasState(name) {
     if (this.states.includes(name)) return true;
     return false;
+  }
+
+  addTransition(fromState, toState, letter) {
+    if (typeof fromState !== 'string') { generateTypeError('addTransition', 'fromState', 'string'); }
+    if (typeof toState !== 'string') { generateTypeError('addTransition', 'toState', 'string'); }
+    if (typeof letter !== 'string') { generateTypeError('addTransition', 'letter', 'string'); }
+    const transitionsFrom = (this.transitionFunction[fromState]
+      ? this.transitionFunction[fromState]
+      : []
+    );
+    transitionsFrom.push([letter, toState])
+    this.transitionFunction[fromState] = transitionsFrom;
+    return this.transitionFunction[fromState];
   }
 }
