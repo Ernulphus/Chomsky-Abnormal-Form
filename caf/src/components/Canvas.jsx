@@ -37,7 +37,7 @@ function Canvas({
       onClick={onClick}
       onMouseMove={onMouseMove}
       onContextMenu={onContextMenu}
-      onKeyPress={(e) => { console.log(e); onKeyPress(e); }}
+      onKeyPress={onKeyPress}
     />
   );
 }
