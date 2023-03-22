@@ -15,3 +15,15 @@ describe.each([
     expect(machine.hasState(name)).toBe(nameIsValid);
   });
 });
+
+describe.each([
+  { oldName: 'q1', newName: 'initial state' },
+])('renameState', ({ oldName, newName }) => {
+  it(`"${oldName}" => "${newName}"`, () => {
+    const machine = new Machine();
+    machine.addState(oldName);
+    machine.renameState(oldName, newName);
+    expect(machine.hasState(oldName)).toBe(false);
+    expect(machine.hasState(newName)).toBe(true);
+  });
+});

@@ -1,3 +1,7 @@
+function generateTypeError(functionName, variableName, expectedType) {
+  throw new Error(`${functionName} expected ${variableName} to be of type ${expectedType}`);
+}
+
 export default class Machine {
   constructor(params = {}) {
     const {
@@ -13,11 +17,18 @@ export default class Machine {
   }
 
   addState(name) {
-    if (typeof name !== 'string') {
-      throw new Error('addState expects "name" to be a string');
-    }
+    if (typeof name !== 'string') { generateTypeError('addState', 'name', 'string'); }
     if (this.states.includes(name)) return;
     this.states.push(name);
+  }
+
+  renameState(oldName, newName) {
+    if (typeof oldName !== 'string') { generateTypeError('renameState', 'oldName', 'string'); }
+    if (typeof newName !== 'string') { generateTypeError('renameState', 'newName', 'string'); }
+    const stateIndex = this.states.indexOf(oldName);
+    if (stateIndex === -1) { return null; }
+    this.states[stateIndex] = newName;
+    return stateIndex;
   }
 
   hasState(name) {
