@@ -8,12 +8,14 @@ function initializeStates() {
 }
 
 function NFADiagram() {
-  const [selected, updateSelected] = useState();
+  const [selected, setSelected] = useState();
+  const [stateName, setStateName] = useState('');
+  const [enteringName, setEnteringName] = useState(false);
 
   const stateRadius = 30;
   const [machineStates] = useState(initializeStates());
   const [alphabet] = useState(['a', 'b']);
-  const [transitionFunction] = useState([]);
+  const [transitionFunction, setTransitionFunction] = useState({});
   const [acceptStates] = useState([]);
 
   const distance = (x1, x2, y1, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
@@ -64,19 +66,21 @@ function NFADiagram() {
           machineStates.set(selected, machineStates.get(`q${machineStates.size - 1}`));
           console.log('deleting');
           machineStates.delete(`q + ${machineStates.size - 1}`);
-          updateSelected(null);
+          setSelected(null);
         } else if (e.shiftKey && selected) {
           // Create a transition to another state
           const dest = nearbyState(canvX, canvY);
           if (dest) {
-            transitionFunction.push({
-              [selected]: { [alphabet[0]]: dest },
-            });
+            const newTransitionFunction = { ...transitionFunction };
+            newTransitionFunction.set(
+              selected[alphabet[0]].push(dest),
+            );
+            setTransitionFunction(newTransitionFunction);
             console.log(transitionFunction);
             console.log('Adding transition');
           }
         } else {
-          updateSelected(nearbyState(canvX, canvY));
+          setSelected(nearbyState(canvX, canvY));
         }
         break;
       case 2:
@@ -107,6 +111,20 @@ function NFADiagram() {
     }
   };
 
+  const handleKeyPress = (e) => {
+    console.log(e.key);
+    if (e.key === 'Enter' && selected) {
+      if (!enteringName) { setEnteringName(true); return; }
+      console.log(machineStates.get(selected));
+      machineStates.set(stateName, machineStates.get(selected));
+      machineStates.delete(selected);
+      setEnteringName(false);
+    } else if (enteringName) {
+      setStateName(`${stateName}${e.key}`);
+      console.log(stateName);
+    }
+  };
+
   const handleContextMenu = (e) => {
     e.preventDefault();
   };
@@ -119,6 +137,7 @@ function NFADiagram() {
         onClick={handleClick}
         onMouseMove={handleMouseMove}
         onContextMenu={handleContextMenu}
+        onKeyPress={handleKeyPress}
       />
       <h3>
         Double-click to create a new state.

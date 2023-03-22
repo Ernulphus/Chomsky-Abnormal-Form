@@ -6,6 +6,7 @@ function Canvas({
   onClick,
   onMouseMove,
   onContextMenu,
+  onKeyPress,
 }) {
   const canvasRef = useRef(null);
 
@@ -31,10 +32,12 @@ function Canvas({
     <canvas
       width="700"
       height="400"
+      tabIndex="0"
       ref={canvasRef}
       onClick={onClick}
       onMouseMove={onMouseMove}
       onContextMenu={onContextMenu}
+      onKeyPress={(e) => { console.log(e); onKeyPress(e); }}
     />
   );
 }
@@ -46,4 +49,5 @@ Canvas.propTypes = {
   onClick: PropTypes.func.isRequired,
   onMouseMove: PropTypes.func.isRequired,
   onContextMenu: PropTypes.func.isRequired,
+  onKeyPress: PropTypes.func.isRequired,
 };
