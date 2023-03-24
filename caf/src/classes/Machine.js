@@ -80,14 +80,19 @@ export default class Machine {
   acceptsWord(word, state = this.initialState) {
     if (typeof word !== 'string') { generateTypeError('acceptsWord', 'word', 'string'); }
 
-    if (word.length === 0) return this.acceptStates.includes(state);
+    if (word.length === 0) {
+      if (this.acceptStates.includes(state)) return [state];
+      return [];
+    }
 
     const letter = word[0];
     const remainingWord = word.slice(1);
     const transitionsFromState = this.getTransitions(state);
     const letterTransitions = transitionsFromState[letter];
-    if (!letterTransitions) return false;
+    if (!letterTransitions) return [];
     const paths = letterTransitions.map((toState) => this.acceptsWord(remainingWord, toState));
-    return paths.includes(true);
+    const validPaths = paths.filter((path) => path.length > 0);
+    if (validPaths.length === 0) return [];
+    return [state, ...validPaths[0]];
   }
 }

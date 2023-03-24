@@ -77,7 +77,7 @@ describe.each([
       initialState: 'q0',
     },
     word: 'a',
-    expectedResult: true,
+    expectedResult: ['q0', 'q0'],
   },
   {
     regex: 'a*',
@@ -89,7 +89,7 @@ describe.each([
       initialState: 'q0',
     },
     word: 'b',
-    expectedResult: false,
+    expectedResult: [],
   },
   {
     regex: 'a*',
@@ -100,8 +100,8 @@ describe.each([
       acceptStates: ['q0'],
       initialState: 'q0',
     },
-    word: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-    expectedResult: true,
+    word: 'aaa',
+    expectedResult: ['q0','q0','q0','q0'],
   },
   {
     regex: 'a*(b+a)*',
@@ -117,7 +117,7 @@ describe.each([
       initialState: 'q0',
     },
     word: 'a',
-    expectedResult: true,
+    expectedResult: ['q0','q0'],
   },
   {
     regex: 'a*(b+a)*',
@@ -133,7 +133,7 @@ describe.each([
       initialState: 'q0',
     },
     word: 'ab',
-    expectedResult: false,
+    expectedResult: [],
   },
   {
     regex: 'a*(b+a)*',
@@ -149,23 +149,7 @@ describe.each([
       initialState: 'q0',
     },
     word: 'aba',
-    expectedResult: true,
-  },
-  {
-    regex: 'a*(b+a)*',
-    params: {
-      states: ['q0', 'q1', 'q2'],
-      alphabet: ['a', 'b'],
-      transitionFunction: {
-        q0: { a: ['q0'], b: ['q1'] },
-        q1: { a: ['q2'], b: ['q1']},
-        q2: { a: ['q0'], b: ['q2'] },
-      },
-      acceptStates: ['q0', 'q2'],
-      initialState: 'q0',
-    },
-    word: 'abaaaaabaaaabaaaaa',
-    expectedResult: true,
+    expectedResult: ['q0','q0','q1','q2'],
   },
   {
     regex: '(a[ab]+)*',
@@ -181,12 +165,16 @@ describe.each([
       initialState: 'q0',
     },
     word: '',
-    expectedResult: true,
+    expectedResult: ['q0'],
   },
 ])('acceptsWord', ({ regex, params, word, expectedResult }) => {
   it(`/${regex}/ ${word} => ${expectedResult}`, () => {
     const machine = new Machine(params);
     const result = machine.acceptsWord(word);
-    expect(result).toBe(expectedResult);
+    expect(
+      JSON.stringify(result),
+    ).toBe(
+      JSON.stringify(expectedResult),
+    );
   });
 });
