@@ -52,7 +52,7 @@ Returns all transitions from `fromState`.
 - [ ] setAcceptStates
 - [ ] setInitialState
 - [X] acceptsWord(word, state)
-Takes required parameter `word`, a string, and optional parameter `state`, a string corresponding to the name of a state in `states`. `state` is `initialState` by default. Returns true of the machine accepts the word from the given initial state, and false if not.
+Takes required parameter `word`, a string, and optional parameter `state`, a string corresponding to the name of a state in `states`. `state` is `initialState` by default. Returns an array of states representing the path to the accept state if the word is accepted, and an empty array if not.
 
 ### MVP: User can design a nondeterministic finite state machine and submit strings in the language to run on it. Site is hosted.  
   - [ ] Site displays a diagram canvas and stores an object representing the machine
