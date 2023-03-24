@@ -9,11 +9,13 @@ export default class Machine {
       alphabet = ['a', 'b'],
       transitionFunction = {},
       acceptStates = [],
+      initialState = 'q0',
     } = params;
     this.states = (states ? [...states] : ['q0']);
     this.alphabet = (alphabet ? [...alphabet] : ['a', 'b']);
     this.transitionFunction = (transitionFunction ? {...transitionFunction} : {});
     this.acceptStates = (acceptStates ? [...acceptStates] : []);
+    this.initialState = (initialState ? initialState : this.states[0]);
   }
 
   addState(name) {
@@ -29,18 +31,20 @@ export default class Machine {
     const stateIndex = this.states.indexOf(oldName);
     if (stateIndex === -1) { return null; }
     this.states[stateIndex] = newName;
-    
-    Object.keys(this.transitionFunction).forEach((state) => {
-      const transitions = this.transitionFunction[state];
-      transitions.forEach((transition, index) => {
-        if (transition[1] === oldName) {
-          const newTransition = [transition[0], newName];
-          transitions[index] = newTransition;
-        }
+
+    Object.keys(this.transitionFunction).forEach((fromState) => {
+      const transitionsFrom = this.transitionFunction[fromState];
+      Object.keys(transitionsFrom).forEach((letter) => {
+        const destinations = transitionsFrom[letter];
+        if (destinations.includes(oldName)) destinations.push(newName);
+        const newDestinations = destinations.filter((toState) => toState !== oldName);
+        transitionsFrom[letter] = newDestinations;
       });
-      this.transitionFunction[newName] = transitions;
+    });
+    if (Object.keys(this.transitionFunction).includes(oldName)) {
+      this.transitionFunction[newName] = this.transitionFunction[oldName];
       delete this.transitionFunction[oldName];
-    })
+    }
 
     return stateIndex;
   }
@@ -54,7 +58,7 @@ export default class Machine {
     if (fromState === '*') return this.transitionFunction;
     const transitionsFrom = (this.transitionFunction[fromState]
       ? this.transitionFunction[fromState]
-      : []
+      : {}
     );
     return transitionsFrom;
   }
@@ -64,8 +68,27 @@ export default class Machine {
     if (typeof toState !== 'string') { generateTypeError('addTransition', 'toState', 'string'); }
     if (typeof letter !== 'string') { generateTypeError('addTransition', 'letter', 'string'); }
     const transitionsFrom = this.getTransitions(fromState);
-    transitionsFrom.push([letter, toState])
+    if (transitionsFrom[letter]) {
+      transitionsFrom[letter].push(toState);
+    } else {
+      transitionsFrom[letter] = [toState];
+    }
     this.transitionFunction[fromState] = transitionsFrom;
     return this.transitionFunction[fromState];
   }
+/*
+  acceptsWord(word) {
+    if (typeof word !== 'string') { generateTypeError('acceptsWord', 'word', 'string'); }
+
+    let state = this.initialState;
+    for (let index = 0; index < word.length; index += 1) {
+      const letter = word[index];
+      if (!alphabet.includes(letter)) { return false; }
+      const transitionsFromState = this.getTransitions(state);
+      
+    }
+
+    return false;
+  }
+*/
 }

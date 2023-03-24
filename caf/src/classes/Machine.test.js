@@ -1,19 +1,5 @@
 import Machine from './Machine';
 
-function arraysAreEquivalent(array1, array2) {
-  if (array1.length !== array2.length) return false;
-  for (let i = 0; i < array1.length; i += 1) {
-    const element1 = array1[i];
-    const element2 = array2[i];
-    if (typeof element1 !== typeof element2) return false;
-    if (Array.isArray(element1)) {
-      if (!arraysAreEquivalent(element1, element2)) return false;
-    }
-    if (element1 !== element2) { return false; }
-  }
-  return true;
-}
-
 describe.each([
   { name: 'q1', transition: [] },
   { name: undefined, transition: [] },
@@ -53,44 +39,29 @@ describe.each([
     states: ['q0', 'q1'],
     transitions: [['q0', 'q1', 'a'], ['q1', 'q0', 'b']],
   },
-])('addTransition', ({ desc, states, transitions }) => {
-  it(desc, () => {
-    const machine = new Machine();
-    states.forEach((state) => { machine.addState(state); });
-    transitions.forEach((transition) => {
-      const [from, to, letter] = transition;
-      const transitionFunction = machine.addTransition(from, to, letter);
-      const expectedElement = [letter, to];
-      const wasAdded = transitionFunction.findIndex((element) => arraysAreEquivalent(expectedElement, element));
-      expect(wasAdded).not.toBe(-1);
-    });
-  });
-});
-
-describe.each([
   {
     desc: 'renaming after addTransition updates transitions',
     states: ['q0', 'q1'],
     transitions: [['q0', 'q1', 'a']],
-    rename: [['q0', 'initial']],
+    rename: [['q1', 'end'], ['q0', 'initial'] ],
   },
-])('addTransition', ({ desc, states, transitions, rename }) => {
+])('addTransition', ({ desc, states, transitions, rename = [] }) => {
   it(desc, () => {
     const machine = new Machine();
     states.forEach((state) => { machine.addState(state); });
     transitions.forEach((transition) => {
       const [from, to, letter] = transition;
       const transitionFunction = machine.addTransition(from, to, letter);
-      const expectedElement = [letter, to];
-      const wasAdded = transitionFunction.findIndex((element) => arraysAreEquivalent(expectedElement, element));
-      expect(wasAdded).not.toBe(-1);
+      const wasAdded = transitionFunction[letter].includes(to);
+      expect(wasAdded).not.toBe(false);
     });
     rename.forEach((update) => {
       const [oldName, newName] = update;
-      const transition = machine.getTransitions(oldName);
+      const oldTransitions = JSON.stringify(machine.getTransitions());
       machine.renameState(oldName, newName);
-      expect(machine.getTransitions(oldName)).toStrictEqual([]);
-      expect(machine.getTransitions(newName)).toStrictEqual(transition);
+      const newTransitions = JSON.stringify(machine.getTransitions());
+      const expectedResult = oldTransitions.replaceAll(oldName, newName);
+      expect(newTransitions).toBe(expectedResult);
     });
   });
 });
