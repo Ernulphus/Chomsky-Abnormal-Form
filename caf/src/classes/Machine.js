@@ -25,9 +25,23 @@ export default class Machine {
   renameState(oldName, newName) {
     if (typeof oldName !== 'string') { generateTypeError('renameState', 'oldName', 'string'); }
     if (typeof newName !== 'string') { generateTypeError('renameState', 'newName', 'string'); }
+    
     const stateIndex = this.states.indexOf(oldName);
     if (stateIndex === -1) { return null; }
     this.states[stateIndex] = newName;
+    
+    Object.keys(this.transitionFunction).forEach((state) => {
+      const transitions = this.transitionFunction[state];
+      transitions.forEach((transition, index) => {
+        if (transition[1] === oldName) {
+          const newTransition = [transition[0], newName];
+          transitions[index] = newTransition;
+        }
+      });
+      this.transitionFunction[newName] = transitions;
+      delete this.transitionFunction[oldName];
+    })
+
     return stateIndex;
   }
 
@@ -36,14 +50,20 @@ export default class Machine {
     return false;
   }
 
-  addTransition(fromState, toState, letter) {
-    if (typeof fromState !== 'string') { generateTypeError('addTransition', 'fromState', 'string'); }
-    if (typeof toState !== 'string') { generateTypeError('addTransition', 'toState', 'string'); }
-    if (typeof letter !== 'string') { generateTypeError('addTransition', 'letter', 'string'); }
+  getTransitions(fromState = '*') {
+    if (fromState === '*') return this.transitionFunction;
     const transitionsFrom = (this.transitionFunction[fromState]
       ? this.transitionFunction[fromState]
       : []
     );
+    return transitionsFrom;
+  }
+
+  addTransition(fromState, toState, letter) {
+    if (typeof fromState !== 'string') { generateTypeError('addTransition', 'fromState', 'string'); }
+    if (typeof toState !== 'string') { generateTypeError('addTransition', 'toState', 'string'); }
+    if (typeof letter !== 'string') { generateTypeError('addTransition', 'letter', 'string'); }
+    const transitionsFrom = this.getTransitions(fromState);
     transitionsFrom.push([letter, toState])
     this.transitionFunction[fromState] = transitionsFrom;
     return this.transitionFunction[fromState];

@@ -66,3 +66,31 @@ describe.each([
     });
   });
 });
+
+describe.each([
+  {
+    desc: 'renaming after addTransition updates transitions',
+    states: ['q0', 'q1'],
+    transitions: [['q0', 'q1', 'a']],
+    rename: [['q0', 'initial']],
+  },
+])('addTransition', ({ desc, states, transitions, rename }) => {
+  it(desc, () => {
+    const machine = new Machine();
+    states.forEach((state) => { machine.addState(state); });
+    transitions.forEach((transition) => {
+      const [from, to, letter] = transition;
+      const transitionFunction = machine.addTransition(from, to, letter);
+      const expectedElement = [letter, to];
+      const wasAdded = transitionFunction.findIndex((element) => arraysAreEquivalent(expectedElement, element));
+      expect(wasAdded).not.toBe(-1);
+    });
+    rename.forEach((update) => {
+      const [oldName, newName] = update;
+      const transition = machine.getTransitions(oldName);
+      machine.renameState(oldName, newName);
+      expect(machine.getTransitions(oldName)).toStrictEqual([]);
+      expect(machine.getTransitions(newName)).toStrictEqual(transition);
+    });
+  });
+});
