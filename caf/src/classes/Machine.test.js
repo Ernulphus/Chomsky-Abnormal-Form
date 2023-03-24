@@ -65,3 +65,128 @@ describe.each([
     });
   });
 });
+
+describe.each([
+  {
+    regex: 'a*',
+    params: {
+      states: ['q0'],
+      alphabet: ['a'],
+      transitionFunction: { q0: { a: ['q0'] } },
+      acceptStates: ['q0'],
+      initialState: 'q0',
+    },
+    word: 'a',
+    expectedResult: true,
+  },
+  {
+    regex: 'a*',
+    params: {
+      states: ['q0'],
+      alphabet: ['a'],
+      transitionFunction: { q0: { a: ['q0'] } },
+      acceptStates: ['q0'],
+      initialState: 'q0',
+    },
+    word: 'b',
+    expectedResult: false,
+  },
+  {
+    regex: 'a*',
+    params: {
+      states: ['q0'],
+      alphabet: ['a'],
+      transitionFunction: { q0: { a: ['q0'] } },
+      acceptStates: ['q0'],
+      initialState: 'q0',
+    },
+    word: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    expectedResult: true,
+  },
+  {
+    regex: 'a*(b+a)*',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { a: ['q0'], b: ['q1'] },
+        q1: { a: ['q2'], b: ['q1']},
+        q2: { a: ['q0'], b: ['q2'] },
+      },
+      acceptStates: ['q0', 'q2'],
+      initialState: 'q0',
+    },
+    word: 'a',
+    expectedResult: true,
+  },
+  {
+    regex: 'a*(b+a)*',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { a: ['q0'], b: ['q1'] },
+        q1: { a: ['q2'], b: ['q1']},
+        q2: { a: ['q0'], b: ['q2'] },
+      },
+      acceptStates: ['q0', 'q2'],
+      initialState: 'q0',
+    },
+    word: 'ab',
+    expectedResult: false,
+  },
+  {
+    regex: 'a*(b+a)*',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { a: ['q0'], b: ['q1'] },
+        q1: { a: ['q2'], b: ['q1']},
+        q2: { a: ['q0'], b: ['q2'] },
+      },
+      acceptStates: ['q0', 'q2'],
+      initialState: 'q0',
+    },
+    word: 'aba',
+    expectedResult: true,
+  },
+  {
+    regex: 'a*(b+a)*',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { a: ['q0'], b: ['q1'] },
+        q1: { a: ['q2'], b: ['q1']},
+        q2: { a: ['q0'], b: ['q2'] },
+      },
+      acceptStates: ['q0', 'q2'],
+      initialState: 'q0',
+    },
+    word: 'abaaaaabaaaabaaaaa',
+    expectedResult: true,
+  },
+  {
+    regex: '(a[ab]+)*',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { a: ['q1'] },
+        q1: { a: ['q2'], b: ['q0', 'q2']},
+        q2: { a: ['q0'], b: ['q2'] },
+      },
+      acceptStates: ['q0', 'q2'],
+      initialState: 'q0',
+    },
+    word: '',
+    expectedResult: true,
+  },
+])('acceptsWord', ({ regex, params, word, expectedResult }) => {
+  it(`/${regex}/ ${word} => ${expectedResult}`, () => {
+    const machine = new Machine(params);
+    const result = machine.acceptsWord(word);
+    expect(result).toBe(expectedResult);
+  });
+});

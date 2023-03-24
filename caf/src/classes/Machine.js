@@ -76,19 +76,18 @@ export default class Machine {
     this.transitionFunction[fromState] = transitionsFrom;
     return this.transitionFunction[fromState];
   }
-/*
-  acceptsWord(word) {
+
+  acceptsWord(word, state = this.initialState) {
     if (typeof word !== 'string') { generateTypeError('acceptsWord', 'word', 'string'); }
 
-    let state = this.initialState;
-    for (let index = 0; index < word.length; index += 1) {
-      const letter = word[index];
-      if (!alphabet.includes(letter)) { return false; }
-      const transitionsFromState = this.getTransitions(state);
-      
-    }
+    if (word.length === 0) return this.acceptStates.includes(state);
 
-    return false;
+    const letter = word[0];
+    const remainingWord = word.slice(1);
+    const transitionsFromState = this.getTransitions(state);
+    const letterTransitions = transitionsFromState[letter];
+    if (!letterTransitions) return false;
+    const paths = letterTransitions.map((toState) => this.acceptsWord(remainingWord, toState));
+    return paths.includes(true);
   }
-*/
 }
