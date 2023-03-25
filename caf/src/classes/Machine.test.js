@@ -17,6 +17,32 @@ describe.each([
 });
 
 describe.each([
+  { states: ['q0'], transitionFunction: { q0: { a: ['q0'] } } },
+  { states: ['q0', 'q1'], transitionFunction: { q1: { a: ['q0'] } } },
+  {
+    states: ['q0', 'q1', 'q2'],
+    transitionFunction: {
+      q0: { a: ['q1'], b: ['q2'] },
+      q1: { a: ['q1'], b: ['q0'] },
+      q2: { a: ['q0', 'q1'], b: ['q1'] },
+    },
+  }
+])('deleteState', ({ states, transitionFunction }) => {
+  it(states.toString(), () => {
+    const params = { states, transitionFunction };
+    const machine = new Machine(params);
+    states.forEach((state) => {
+      const newStates = machine.deleteState(state);
+      const newTransitionFunction = machine.getTransitions();
+      expect(newStates.includes(state)).toBe(false);
+      expect(
+        JSON.stringify(newTransitionFunction).match(state)
+      ).toBe(null);
+    });
+  });
+});
+
+describe.each([
   { oldName: 'q1', newName: 'initial state' },
 ])('renameState', ({ oldName, newName }) => {
   it(`"${oldName}" => "${newName}"`, () => {

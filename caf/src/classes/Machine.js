@@ -49,6 +49,21 @@ export default class Machine {
     return stateIndex;
   }
 
+  deleteState(stateToRemove) {
+    this.states = this.states.filter((state) => state !== stateToRemove);
+
+    if (this.transitionFunction[stateToRemove]) delete this.transitionFunction[stateToRemove];
+    Object.keys(this.transitionFunction).forEach((fromState) => {
+      Object.keys(this.transitionFunction[fromState]).forEach((letter) => {
+        let toStates = this.transitionFunction[fromState][letter];
+        if (!toStates) return;
+        toStates = toStates.filter((toState) => toState !== stateToRemove);
+        this.transitionFunction[fromState][letter] = toStates;
+      });
+    });
+    return this.states;
+  }
+
   hasState(name) {
     if (this.states.includes(name)) return true;
     return false;
