@@ -34,7 +34,7 @@ Creates a new state with name `name` and with with no transitions to or from it.
 Renames state `oldName` to `newName` and returns the index of the state in `states`.
 - [X] hasState(name)
 Returns true or false, depending on whether state `name` exists.
-- [ ] deleteState: remove a state
+- [X] deleteState(state): remove a state, returns the new list of states
 - [ ] setStates: replace `states` with given array
 - [ ] addLetter
 - [ ] deleteLetter
