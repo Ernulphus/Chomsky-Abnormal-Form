@@ -46,6 +46,11 @@ export default class Machine {
       delete this.transitionFunction[oldName];
     }
 
+    if (this.initialState === oldName) this.initialState = newName;
+
+    this.acceptStates.push(newName);
+    this.acceptStates = this.acceptStates.filter((state) => state !== oldName);
+
     return stateIndex;
   }
 
