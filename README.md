@@ -36,9 +36,9 @@ Renames state `oldName` to `newName` and returns the index of the state in `stat
 Returns true or false, depending on whether state `name` exists.
 - [X] deleteState(state): remove a state, returns the new list of states
 - [ ] setStates: replace `states` with given array
-- [ ] addLetter
-- [ ] deleteLetter
-- [ ] setAlphabet
+- [X] addLetter(letter): adds `letter` to alphabet, returns alphabet
+- [X] deleteLetter(letter): removes `letter` from alphabet, returns alphabet
+- [X] setAlphabet(alphabet): sets alphabet to `alphabet`, returns alphabet
 - [X] getTransitions(fromState)
 If a value is passed for `fromState`, it returns all transitions leading from `fromState`.
 Otherwise, it returns `transitionFunction`.

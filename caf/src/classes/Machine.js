@@ -69,6 +69,22 @@ export default class Machine {
     return false;
   }
 
+  addLetter(letter) {
+    if (this.alphabet.includes(letter)) return this.alphabet;
+    this.alphabet.push(letter);
+    return this.alphabet;
+  }
+
+  deleteLetter(letter) {
+    this.alphabet = this.alphabet.filter((cha) => cha !== letter);
+    return this.alphabet;
+  }
+
+  setAlphabet(alphabet) {
+    this.alphabet = alphabet;
+    return this.alphabet;
+  }
+
   getTransitions(fromState = '*') {
     if (fromState === '*') return this.transitionFunction;
     const transitionsFrom = (this.transitionFunction[fromState]
