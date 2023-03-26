@@ -47,8 +47,8 @@ Adds a transition from `fromState` to `toState` for `letter`.
 Returns all transitions from `fromState`.
 - [ ] deleteTransition
 - [ ] setTransitions: replace transitionFunction with a given object
-- [ ] addAcceptState
-- [ ] deleteAcceptState
+- [X] addAcceptState(state): append `state` to acceptStates and return acceptStates
+- [X] deleteAcceptState(state): remove `state` from acceptStates and return acceptStates
 - [ ] setAcceptStates
 - [ ] setInitialState
 - [X] acceptsWord(word, state)
