@@ -32,6 +32,9 @@ function NFADiagram() {
   const [machine] = useState(new Machine());
   const [stateCoords] = useState(generateInitialCoordinates(machine.states));
 
+  const [word, setWord] = useState('');
+  const [wordResult, setWordResult] = useState('');
+
   const stateRadius = 30;
   const distance = (x1, x2, y1, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
 
@@ -47,20 +50,18 @@ function NFADiagram() {
     return nearest;
   };
 
-  const draw = (ctx) => {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const drawStates = (ctx) => {
     Object.keys(stateCoords).forEach((key) => {
       const [x, y] = stateCoords[key];
       ctx.beginPath();
       ctx.arc(x, y, stateRadius, 0, Math.PI * 2, true);
       if (key === selected) {
         ctx.fillStyle = '#99AAFF'; // Color of selected state
-        ctx.fill();
-        ctx.fillStyle = '#111188';
       } else {
-        ctx.fillStyle = '#000000';
-        ctx.stroke();
+        ctx.fillStyle = '#FFFFFF';
       }
+      ctx.fill();
+      ctx.stroke();
       if (machine.getAcceptStates().includes(key)) {
         ctx.beginPath();
         ctx.arc(x, y, stateRadius * 0.8, 0, Math.PI * 2, true);
@@ -69,8 +70,33 @@ function NFADiagram() {
       ctx.moveTo(x - stateRadius, y - stateRadius);
       ctx.textAlign = 'center';
       ctx.font = `${stateRadius}px serif`;
+      ctx.fillStyle = '#000000';
       ctx.fillText(key, x, y + 5);
-    }); // End forEach
+      ctx.stroke();
+    }); // End of drawing states
+  };
+
+  const drawTransitions = (ctx) => {
+    const delta = machine.getTransitions();
+    Object.keys(delta).forEach((fromState) => {
+      Object.keys(delta[fromState]).forEach((letter) => {
+        delta[fromState][letter].forEach((toState) => {
+          ctx.beginPath();
+          const [fromX, fromY] = stateCoords[fromState];
+          const [toX, toY] = stateCoords[toState];
+          ctx.moveTo(fromX, fromY);
+          ctx.lineTo(toX, toY);
+          ctx.moveTo((toX + fromX) / 2, (toY + toY) / 2);
+          ctx.stroke();
+        });
+      });
+    });
+  };
+
+  const draw = (ctx) => {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    drawTransitions(ctx);
+    drawStates(ctx);
   };
 
   const handleClick = (e) => {
@@ -90,7 +116,7 @@ function NFADiagram() {
         if (newTransition) {
           const dest = nearbyState(canvX, canvY);
           if (dest) {
-            machine.addTransition(selected, dest, machine.alphabet[0]);
+            console.log(machine.addTransition(selected, dest, machine.alphabet[0]));
           }
           break;
         }
@@ -155,6 +181,19 @@ function NFADiagram() {
     e.preventDefault();
   };
 
+  const updateWord = (e) => {
+    setWord(e.target.value);
+  };
+
+  const checkWord = () => {
+    const path = machine.acceptsWord(word);
+    if (path.length) {
+      setWordResult('Word is in the language of this machine!');
+    } else {
+      setWordResult('Word is not in this language.');
+    }
+  };
+
   return (
     <div>
       <h2>Draw a diagram!</h2>
@@ -165,6 +204,9 @@ function NFADiagram() {
         onContextMenu={handleContextMenu}
         onKeyPress={handleKeyPress}
       />
+      <input onChange={updateWord} />
+      <button type="button" onClick={checkWord}>Enter</button>
+      {wordResult && <h2>{wordResult}</h2>}
       <h3>
         Double-click to create a new state.
         <br />
