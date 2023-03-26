@@ -13,9 +13,9 @@ export default class Machine {
     } = params;
     this.states = (states ? [...states] : ['q0']);
     this.alphabet = (alphabet ? [...alphabet] : ['a', 'b']);
-    this.transitionFunction = (transitionFunction ? {...transitionFunction} : {});
+    this.transitionFunction = (transitionFunction ? { ...transitionFunction } : {});
     this.acceptStates = (acceptStates ? [...acceptStates] : []);
-    this.initialState = (initialState ? initialState : this.states[0]);
+    this.initialState = (states.includes(initialState) ? initialState : this.states[0]);
   }
 
   addState(name) {
@@ -27,7 +27,7 @@ export default class Machine {
   renameState(oldName, newName) {
     if (typeof oldName !== 'string') { generateTypeError('renameState', 'oldName', 'string'); }
     if (typeof newName !== 'string') { generateTypeError('renameState', 'newName', 'string'); }
-    
+
     const stateIndex = this.states.indexOf(oldName);
     if (stateIndex === -1) { return null; }
     this.states[stateIndex] = newName;
@@ -111,6 +111,25 @@ export default class Machine {
     }
     this.transitionFunction[fromState] = transitionsFrom;
     return this.transitionFunction[fromState];
+  }
+
+  getAcceptStates() {
+    return this.acceptStates;
+  }
+
+  hasAcceptState(state) {
+    return this.acceptStates.includes(state);
+  }
+
+  addAcceptState(state) {
+    if (this.acceptStates.includes(state)) return this.acceptStates;
+    this.acceptStates.push(state);
+    return this.acceptStates;
+  }
+
+  deleteAcceptState(state) {
+    this.acceptStates = this.acceptStates.filter((x) => x !== state);
+    return this.acceptStates;
   }
 
   acceptsWord(word, state = this.initialState) {

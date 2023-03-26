@@ -1,29 +1,46 @@
 import React, { useState } from 'react';
 import Canvas from './Canvas';
+import Machine from '../classes/Machine';
 
-function initializeStates() {
-  const states = new Map();
-  states.set('q0', [100, 100]);
-  return states;
+const MOUSE_BUTTON = {
+  leftClick: 0,
+  auxClick: 1,
+  rightClick: 2,
+  backClick: 3,
+  forwardClick: 4,
+};
+
+const CLICKS = {
+  singleClick: 1,
+  doubleClick: 2,
+};
+
+function generateInitialCoordinates(states) {
+  const coordinates = {};
+  states.forEach((state, index) => {
+    coordinates[state] = [(index + 1) * 100, 100];
+  });
+  return coordinates;
 }
 
 function NFADiagram() {
   const [selected, setSelected] = useState();
-  const [stateName, setStateName] = useState('');
   const [enteringName, setEnteringName] = useState(false);
+  const [stateName, setStateName] = useState('');
+  const [stateCounter, setStateCounter] = useState(1);
+
+  const [machine] = useState(new Machine());
+  const [stateCoords] = useState(generateInitialCoordinates(machine.states));
 
   const stateRadius = 30;
-  const [machineStates] = useState(initializeStates());
-  const [alphabet] = useState(['a', 'b']);
-  const [transitionFunction, setTransitionFunction] = useState({});
-  const [acceptStates] = useState([]);
-
   const distance = (x1, x2, y1, y2) => Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
 
-  const nearbyState = (x, y) => {
+  // Returns the state clicked on, or null if there's none
+  const nearbyState = (mouseX, mouseY) => {
     let nearest = null;
-    machineStates.forEach((value, key) => {
-      if (distance(value[0], x, value[1], y) < stateRadius) {
+    Object.keys(stateCoords).forEach((key) => {
+      const [stateX, stateY] = stateCoords[key];
+      if (distance(stateX, mouseX, stateY, mouseY) < stateRadius) {
         nearest = key;
       }
     });
@@ -32,9 +49,10 @@ function NFADiagram() {
 
   const draw = (ctx) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    machineStates.forEach((value, key) => {
+    Object.keys(stateCoords).forEach((key) => {
+      const [x, y] = stateCoords[key];
       ctx.beginPath();
-      ctx.arc(value[0], value[1], stateRadius, 0, Math.PI * 2, true);
+      ctx.arc(x, y, stateRadius, 0, Math.PI * 2, true);
       if (key === selected) {
         ctx.fillStyle = '#99AAFF'; // Color of selected state
         ctx.fill();
@@ -43,62 +61,67 @@ function NFADiagram() {
         ctx.fillStyle = '#000000';
         ctx.stroke();
       }
-      if (acceptStates.includes(key)) {
+      if (machine.getAcceptStates().includes(key)) {
         ctx.beginPath();
-        ctx.arc(value[0], value[1], stateRadius * 0.8, 0, Math.PI * 2, true);
+        ctx.arc(x, y, stateRadius * 0.8, 0, Math.PI * 2, true);
         ctx.stroke();
       }
-      ctx.moveTo(value[0] - stateRadius, value[1] - stateRadius);
+      ctx.moveTo(x - stateRadius, y - stateRadius);
       ctx.textAlign = 'center';
       ctx.font = `${stateRadius}px serif`;
-      ctx.fillText(key, value[0], value[1] + 5);
+      ctx.fillText(key, x, y + 5);
     }); // End forEach
   };
 
   const handleClick = (e) => {
     const canvX = e.clientX - e.target.offsetLeft; // X position on canvas of click
     const canvY = e.clientY - e.target.offsetTop; // Y position on canvas of click
+    const deleteSelected = e.altKey && selected;
+    const newTransition = e.shiftKey && selected;
     switch (e.detail) {
-      case 1:
-        // alt click to 'delete' the selected state
-        if (e.altKey && selected) {
-          // To not fuck things up, move this state to last state and delete last state
-          machineStates.set(selected, machineStates.get(`q${machineStates.size - 1}`));
-          console.log('deleting');
-          machineStates.delete(`q + ${machineStates.size - 1}`);
+      case CLICKS.singleClick:
+      {
+        if (deleteSelected) {
+          machine.deleteState(selected);
+          delete stateCoords[selected];
           setSelected(null);
-        } else if (e.shiftKey && selected) {
-          // Create a transition to another state
+          break;
+        }
+        if (newTransition) {
           const dest = nearbyState(canvX, canvY);
           if (dest) {
-            const newTransitionFunction = { ...transitionFunction };
-            newTransitionFunction.set(
-              selected[alphabet[0]].push(dest),
-            );
-            setTransitionFunction(newTransitionFunction);
-            console.log(transitionFunction);
-            console.log('Adding transition');
+            machine.addTransition(selected, dest, machine.alphabet[0]);
           }
-        } else {
-          setSelected(nearbyState(canvX, canvY));
+          break;
         }
+        // Click with no keys pressed
+        setSelected(nearbyState(canvX, canvY));
         break;
-      case 2:
+      }
+      case CLICKS.doubleClick:
+      {
         if (selected) {
-          const index = acceptStates.indexOf(selected);
-          if (index > -1) {
-            acceptStates.splice(index, 1);
+          // Turn selected state into an accept state
+          if (machine.hasAcceptState(selected)) {
+            machine.deleteAcceptState(selected);
           } else {
-            acceptStates.push(selected);
+            machine.addAcceptState(selected);
           }
-        } else {
-          // If no state is selected,
-          // Create a new state at the location of the double click
-          machineStates.set(`q${machineStates.size}`, [canvX, canvY]);
+          break;
         }
+        // If no state is selected,
+        // Create a new state at the location of the double click
+        const newName = `q${stateCounter}`;
+        setStateCounter(stateCounter + 1);
+        machine.addState(newName);
+        stateCoords[newName] = [canvX, canvY];
+
         break;
+      }
       case 3:
+      {
         break;
+      }
       default:
     }
   };
@@ -106,23 +129,26 @@ function NFADiagram() {
   const handleMouseMove = (e) => {
     const canvX = e.clientX - e.target.offsetLeft; // X position on canvas of click
     const canvY = e.clientY - e.target.offsetTop; // Y position on canvas of click
-    if (e.buttons === 2 && selected) {
-      machineStates.set(selected, [canvX, canvY]);
+    if (e.buttons === MOUSE_BUTTON.rightClick && selected) {
+      stateCoords[selected] = [canvX, canvY];
     }
   };
 
   const handleKeyPress = (e) => {
-    console.log(e.key);
-    if (e.key === 'Enter' && selected) {
+    if (!selected) return;
+
+    if (e.key === 'Enter') {
       if (!enteringName) { setEnteringName(true); return; }
-      console.log(machineStates.get(selected));
-      machineStates.set(stateName, machineStates.get(selected));
-      machineStates.delete(selected);
       setEnteringName(false);
-    } else if (enteringName) {
-      setStateName(`${stateName}${e.key}`);
-      console.log(stateName);
+      setStateName('');
+      return;
     }
+    const newStateName = `${stateName}${e.key}`;
+    setStateName(newStateName);
+    setSelected(newStateName);
+    machine.renameState(selected, newStateName);
+    stateCoords[newStateName] = stateCoords[selected];
+    delete stateCoords[selected];
   };
 
   const handleContextMenu = (e) => {
