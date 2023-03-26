@@ -1,3 +1,7 @@
+html {
+  font-family: system-ui;
+}
+
 .App {
   text-align: center;
 }
@@ -39,4 +43,35 @@ canvas {
   to {
     transform: rotate(360deg);
   }
+}
+
+.nfa-diagram {
+  display: flex;
+}
+
+.three-quarters-width {
+  flex-grow: 3;
+}
+
+.one-quarter-width {
+  flex-grow: 1;
+}
+
+.nfa-diagram-word-input-box {
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+}
+
+input, button {
+  margin: 0.5rem auto;
+  width: 50%;
+  border-radius: 5px;
+  padding: 0.5rem;
+  border: 1px solid grey;
+  background-color: transparent;
+}
+
+input:hover, button:hover {
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.27);
 }

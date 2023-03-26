@@ -15,6 +15,24 @@ const CLICKS = {
   doubleClick: 2,
 };
 
+function Instructions() {
+  return (
+    <h3>
+      Double-click to create a new state.
+      <br />
+      Click on a state to select it.
+      <br />
+      Double-click a selected state to make it an accepting state.
+      <br />
+      Alt-click a selected state to delete it.
+      <br />
+      Shift-click a state to add a transition from the selected state.
+      <br />
+      Right-click and drag to move the selected state.
+    </h3>
+  );
+}
+
 function generateInitialCoordinates(states) {
   const coordinates = {};
   states.forEach((state, index) => {
@@ -195,31 +213,27 @@ function NFADiagram() {
   };
 
   return (
-    <div>
-      <h2>Draw a diagram!</h2>
-      <Canvas
-        draw={draw}
-        onClick={handleClick}
-        onMouseMove={handleMouseMove}
-        onContextMenu={handleContextMenu}
-        onKeyPress={handleKeyPress}
-      />
-      <input onChange={updateWord} />
-      <button type="button" onClick={checkWord}>Enter</button>
-      {wordResult && <h2>{wordResult}</h2>}
-      <h3>
-        Double-click to create a new state.
-        <br />
-        Click on a state to select it.
-        <br />
-        Double-click a selected state to make it an accepting state.
-        <br />
-        Alt-click a selected state to delete it.
-        <br />
-        Shift-click a state to add a transition from the selected state.
-        <br />
-        Right-click and drag to move the selected state.
-      </h3>
+    <div className="nfa-diagram">
+      <div className="three-quarters-width">
+        <h2>Draw a diagram!</h2>
+        <Canvas
+          draw={draw}
+          onClick={handleClick}
+          onMouseMove={handleMouseMove}
+          onContextMenu={handleContextMenu}
+          onKeyPress={handleKeyPress}
+        />
+        <div className="nfa-diagram-word-input-box">
+          <input placeholder="Enter a word here..." onChange={updateWord} />
+          <button type="button" onClick={checkWord}>
+            <h3>Enter</h3>
+          </button>
+          {wordResult && <h2>{wordResult}</h2>}
+        </div>
+      </div>
+      <div className="one-quarter-width">
+        <Instructions />
+      </div>
     </div>
   );
 }
