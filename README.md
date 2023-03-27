@@ -49,9 +49,9 @@ For example, given the transition function `
     b: ['q2', 'q3'],
   },
 `,
-  - getTransitions() returns the entire transition function
-  - getTranstions('q0') returns { a: ['q1'], b: ['q2', 'q3'] }
-  - getTransitions('q0', 'b') returns ['q2', 'q3']
+  - `getTransitions()` returns the entire transition function
+  - `getTranstions('q0')` returns `{ a: ['q1'], b: ['q2', 'q3'] }`
+  - `getTransitions('q0', 'b')` returns `['q2', 'q3']`
 - [X] addTransition(fromState, toState, letter)
 Adds a transition from `fromState` to `toState` for `letter`.
 Returns all transitions from `fromState`.
