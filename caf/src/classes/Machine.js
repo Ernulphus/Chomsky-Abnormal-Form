@@ -1,3 +1,5 @@
+export const EPSILON = '\u03B5';
+
 function generateTypeError(functionName, variableName, expectedType) {
   throw new Error(`${functionName} expected ${variableName} to be of type ${expectedType}`);
 }

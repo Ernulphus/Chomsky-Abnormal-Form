@@ -1,4 +1,4 @@
-import Machine from './Machine';
+import Machine, { EPSILON } from './Machine';
 
 describe.each([
   { name: 'q1', transition: [] },
