@@ -146,11 +146,15 @@ export default class Machine {
 
     const letter = word[0];
     const remainingWord = word.slice(1);
-    const transitionsFromState = this.getTransitions(state);
-    const letterTransitions = transitionsFromState[letter];
-    if (!letterTransitions) return [];
-    const paths = letterTransitions.map((toState) => this.acceptsWord(remainingWord, toState));
-    const validPaths = paths.filter((path) => path.length > 0);
+    const epsilonPaths = this
+      .getTransitions(state, EPSILON)
+      .map((toState) => this.acceptsWord(word, toState));
+    const letterPaths = this
+      .getTransitions(state, letter)
+      .map((toState) => this.acceptsWord(remainingWord, toState));
+    const validPaths = epsilonPaths
+      .concat(letterPaths)
+      .filter((path) => path.length > 0);
     if (validPaths.length === 0) return [];
     return [state, ...validPaths[0]];
   }

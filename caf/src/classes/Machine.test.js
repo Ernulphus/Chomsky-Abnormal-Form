@@ -92,7 +92,7 @@ describe.each([
   });
 });
 
-describe.only.each([
+describe.each([
   {
     stateFrom: 'q0',
     statesTo: [['a', 'q1']],
@@ -252,6 +252,38 @@ describe.each([
     },
     word: '',
     expectedResult: ['q0'],
+  },
+  {
+    regex: 'a*b',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { 'a': ['q0'], '\u03B5': ['q1'] },
+        q1: { 'b': ['q2'] },
+        q2: {},
+      },
+      acceptStates: ['q2'],
+      initialState: 'q0',
+    },
+    word: 'b',
+    expectedResult: ['q0', 'q1', 'q2'],
+  },
+  {
+    regex: 'a*b',
+    params: {
+      states: ['q0', 'q1', 'q2'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { 'a': ['q0'], '\u03B5': ['q1'] },
+        q1: { 'b': ['q2'] },
+        q2: {},
+      },
+      acceptStates: ['q2'],
+      initialState: 'q0',
+    },
+    word: 'aaab',
+    expectedResult: ['q0', 'q0', 'q0', 'q0', 'q1', 'q2'],
   },
 ])('acceptsWord', ({ regex, params, word, expectedResult }) => {
   it(`/${regex}/ ${word} => ${expectedResult}`, () => {
