@@ -102,10 +102,22 @@ function NFADiagram() {
           ctx.beginPath();
           const [fromX, fromY] = stateCoords[fromState];
           const [toX, toY] = stateCoords[toState];
+          const [midX, midY] = [(toX + fromX) / 2, (toY + fromY) / 2];
+          const midToDist = distance(midX, toX, midY, toY);
+          const [normX, normY] = [(toX - midX) / (midToDist / 15), (toY - midY) / (midToDist / 15)];
+          const arrowX1 = midX + normX * -0.7071 - normY * 0.7071;
+          const arrowY1 = midY + normY * -0.7071 + normX * 0.7071;
+          const arrowX2 = midX + normX * -0.7071 - normY * -0.7071;
+          const arrowY2 = midY + normY * -0.7071 + normX * -0.7071;
+
           ctx.moveTo(fromX, fromY);
           ctx.lineTo(toX, toY);
-          ctx.moveTo((toX + fromX) / 2, (toY + toY) / 2);
           ctx.stroke();
+          ctx.moveTo(midX, midY);
+          ctx.lineTo(arrowX1, arrowY1);
+          ctx.lineTo(arrowX2, arrowY2);
+          ctx.lineTo(midX, midY);
+          ctx.fill();
         });
       });
     });
