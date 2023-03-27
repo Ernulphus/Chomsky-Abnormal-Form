@@ -9,7 +9,7 @@ import {
 
 import Home from './components/Home';
 import NFADiagram from './components/NFADiagram';
-import Regex from './components/Regex';
+import RegexConverter from './components/RegexConverter';
 
 function App() {
   return (
@@ -18,7 +18,7 @@ function App() {
         <Routes>
           <Route exact path="/" element={<Home />} />
           <Route exact path="/nfadiagram" element={<NFADiagram />} />
-          <Route exact path="/regex" element={<Regex />} />
+          <Route exact path="/regex" element={<RegexConverter />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
