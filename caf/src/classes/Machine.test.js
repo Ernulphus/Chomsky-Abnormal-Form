@@ -92,6 +92,66 @@ describe.each([
   });
 });
 
+describe.only.each([
+  {
+    stateFrom: 'q0',
+    statesTo: [['a', 'q1']],
+    letter: '*',
+    expectedResult: { a: ['q1'] },
+  },
+  {
+    stateFrom: 'q0',
+    statesTo: [['a', 'q1']],
+    letter: 'a',
+    expectedResult: ['q1'],
+  },
+  {
+    stateFrom: 'q0',
+    statesTo: [[EPSILON, 'q1']],
+    letter: '*',
+    expectedResult: { EPSILON: ['q1'] },
+  },
+  {
+    stateFrom: 'q0',
+    statesTo: [[EPSILON, 'q1']],
+    letter: EPSILON,
+    expectedResult: ['q1'],
+  },
+])('getTransitions', ({
+  stateFrom,
+  statesTo,
+  letter,
+  expectedResult,
+}) => {
+  if (expectedResult.EPSILON) {
+    expectedResult[EPSILON] = expectedResult.EPSILON;
+    delete expectedResult.EPSILON;
+  }
+  it(
+    `${stateFrom}, ${letter} => ${JSON.stringify(expectedResult)}`,
+    () => {
+      const states = [];
+      const transitionFunction = {};
+      states.push(stateFrom);
+      transitionFunction[stateFrom] = {};
+      statesTo.forEach(([letterTo, stateTo]) => {
+        if (!states.includes(stateTo)) states.push(stateTo);
+        if (!transitionFunction[stateFrom][letterTo]) {
+          transitionFunction[stateFrom][letterTo] = [stateTo];
+          return;
+        }
+        if (!transitionFunction[stateFrom][letterTo].includes(stateTo)) {
+          transitionFunction[stateFrom][letterTo].push(stateTo);
+        }
+      });
+      const params = { states, transitionFunction };
+      const machine = new Machine(params);
+      const result = machine.getTransitions(stateFrom, letter);
+      expect(result).toStrictEqual(expectedResult);
+    },
+  );
+});
+
 describe.each([
   {
     regex: 'a*',

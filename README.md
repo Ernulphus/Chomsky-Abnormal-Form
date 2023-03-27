@@ -39,9 +39,19 @@ Returns true or false, depending on whether state `name` exists.
 - [X] addLetter(letter): adds `letter` to alphabet, returns alphabet
 - [X] deleteLetter(letter): removes `letter` from alphabet, returns alphabet
 - [X] setAlphabet(alphabet): sets alphabet to `alphabet`, returns alphabet
-- [X] getTransitions(fromState)
-If a value is passed for `fromState`, it returns all transitions leading from `fromState`.
-Otherwise, it returns `transitionFunction`.
+- [X] getTransitions(fromState, letter)
+Both `fromState` and `letter` are optional. If neither value is given, the entire transitionFunction is returned.
+If only `fromState` is specified, all transitions from `fromState` are returned.
+If both are specified, only the array of states to which `fromState` transitions on `letter` are returned.
+For example, given the transition function `
+  q0: {
+    a: ['q1'],
+    b: ['q2', 'q3'],
+  },
+`,
+  - getTransitions() returns the entire transition function
+  - getTranstions('q0') returns { a: ['q1'], b: ['q2', 'q3'] }
+  - getTransitions('q0', 'b') returns ['q2', 'q3']
 - [X] addTransition(fromState, toState, letter)
 Adds a transition from `fromState` to `toState` for `letter`.
 Returns all transitions from `fromState`.

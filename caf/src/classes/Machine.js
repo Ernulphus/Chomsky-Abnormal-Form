@@ -92,13 +92,15 @@ export default class Machine {
     return this.alphabet;
   }
 
-  getTransitions(fromState = '*') {
+  getTransitions(fromState = '*', letter = '*') {
     if (fromState === '*') return this.transitionFunction;
     const transitionsFrom = (this.transitionFunction[fromState]
       ? this.transitionFunction[fromState]
       : {}
     );
-    return transitionsFrom;
+    if (letter === '*') return transitionsFrom;
+    if (transitionsFrom[letter]) return transitionsFrom[letter];
+    return [];
   }
 
   addTransition(fromState, toState, letter) {
