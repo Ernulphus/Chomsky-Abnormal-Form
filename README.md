@@ -13,18 +13,18 @@ Creates a new Machine object. Optionally takes an object as its argument, which 
   - states: an array of strings describing the names of the machine's states
   - alphabet: an array of characters (size 1 strings) describing accepted letters
   - transitionFunction: an object of the form
-  `{
-     state1: {
-       a: [state2, state3],
-       b: [state1],
-     },
-     state2: {
-       a: [state1],
-       b: [state3],
-     },
-     state3: {
-       b: [state3],
-     },
+  `{  
+     state1: {  
+       a: [state2, state3],  
+       b: [state1],  
+     },  
+     state2: {  
+       a: [state1],  
+       b: [state3],  
+     },  
+     state3: {  
+       b: [state3],  
+     },  
    }`
   - acceptStates: an array of strings
   - initialState: a string
@@ -55,9 +55,9 @@ Returns all transitions from `fromState`.
 Takes required parameter `word`, a string, and optional parameter `state`, a string corresponding to the name of a state in `states`. `state` is `initialState` by default. Returns an array of states representing the path to the accept state if the word is accepted, and an empty array if not.
 
 ### MVP: User can design a nondeterministic finite state machine and submit strings in the language to run on it. Site is hosted.  
-  - [ ] Site displays a diagram canvas and stores an object representing the machine
-  - [ ] Creating a state in the diagram updates representation of the machine
-  - [ ] Button to submit a string to be run on the machine
+  - [X] Site displays a diagram canvas and stores an object representing the machine
+  - [X] Creating a state in the diagram updates representation of the machine
+  - [X] Button to submit a string to be run on the machine
   
 ### Other goals
 - [ ] Convert to/from deterministic FAs (HMU 2.3.5)
