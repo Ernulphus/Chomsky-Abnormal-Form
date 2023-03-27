@@ -86,7 +86,6 @@ function NFADiagram() {
         ctx.stroke();
       }
       ctx.moveTo(x - stateRadius, y - stateRadius);
-      ctx.textAlign = 'center';
       ctx.font = `${stateRadius}px serif`;
       ctx.fillStyle = '#000000';
       ctx.fillText(key, x, y + 5);
@@ -105,10 +104,11 @@ function NFADiagram() {
           const [midX, midY] = [(toX + fromX) / 2, (toY + fromY) / 2];
           const midToDist = distance(midX, toX, midY, toY);
           const [normX, normY] = [(toX - midX) / (midToDist / 15), (toY - midY) / (midToDist / 15)];
-          const arrowX1 = midX + normX * -0.7071 - normY * 0.7071;
-          const arrowY1 = midY + normY * -0.7071 + normX * 0.7071;
-          const arrowX2 = midX + normX * -0.7071 - normY * -0.7071;
-          const arrowY2 = midY + normY * -0.7071 + normX * -0.7071;
+          const arrowX1 = midX + normX * -0.86 - normY * 0.5;
+          const arrowY1 = midY + normY * -0.86 + normX * 0.5;
+          const arrowX2 = midX + normX * -0.86 - normY * -0.5;
+          const arrowY2 = midY + normY * -0.86 + normX * -0.5;
+          const [textX, textY] = [arrowX1 - normY, arrowY1 + normX];
 
           ctx.moveTo(fromX, fromY);
           ctx.lineTo(toX, toY);
@@ -118,6 +118,11 @@ function NFADiagram() {
           ctx.lineTo(arrowX2, arrowY2);
           ctx.lineTo(midX, midY);
           ctx.fill();
+
+          ctx.font = `${stateRadius * 0.9}px serif`;
+          ctx.fillStyle = '#000000';
+          ctx.moveTo(textX, textY);
+          ctx.fillText(letter, textX, textY + 5);
         });
       });
     });
@@ -125,6 +130,7 @@ function NFADiagram() {
 
   const draw = (ctx) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.textAlign = 'center';
     drawTransitions(ctx);
     drawStates(ctx);
   };
