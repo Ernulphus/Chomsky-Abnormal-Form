@@ -1,44 +1,49 @@
-import { convertRegex } from './RegexConverter';
-import { EPSILON } from '../classes/Machine';
+import { joinMachines } from './RegexConverter';
+import Machine, { EPSILON } from '../classes/Machine';
 
-function generateWord(length, alphabet) {
-  let word = '';
-  for (let iter = 0; iter < length; iter += 1) {
-    const index = Math.floor(Math.random() * alphabet.length);
-    word = word.concat(alphabet[index]);
-  }
-  return word;
-}
-
-const generalAlphabet = Array.from('abcdefghijklmnopqrstuvwxyz');
-
-describe(EPSILON, () => {
-  it(`q0: ${EPSILON} => [q1], ((q1))`, () => {
-    const machine = convertRegex(EPSILON);
-    const acceptStates = machine.getAcceptStates();
-    expect(acceptStates).toStrictEqual(['q1']);
-    const transitionFunction = machine.getTransitions();
-    expect(transitionFunction).toStrictEqual({
-      q0: {
-        [EPSILON]: ['q1'],
+describe('joinMachines()', () => {
+  it('joins 2 NFAs', () => {
+    const params1 = {
+      states: ['q0', 'q1'],
+      alphabet: ['a'],
+      transitionFunction: {
+        q0: { a: ['q1'] },
       },
-    });
-  });
-});
-
-describe('ab', () => {
-  it(`q0: a => [q1], q1: b => [q2], ((q2))`, () => {
-    const machine = convertRegex('ab');
-    const acceptStates = machine.getAcceptStates();
-    expect(acceptStates).toStrictEqual(['q2']);
-    const transitionFunction = machine.getTransitions();
-    expect(transitionFunction).toStrictEqual({
-      q0: {
-        a: ['q1'],
+      acceptStates: ['q1'],
+      initialState: 'q0',
+    };
+    const params2 = {
+      states: ['q2', 'q3'],
+      alphabet: ['b'],
+      transitionFunction: {
+        q2: { b: ['q3'] },
       },
-      q1: {
-        b: ['q2'],
+      acceptStates: ['q3'],
+      initialState: 'q2',
+    };
+    const machine1 = new Machine(params1);
+    const machine2 = new Machine(params2);
+    const joinedMachine = joinMachines(machine1, machine2);
+    const expectedParams = {
+      states: ['q0', 'q1', 'q2', 'q3'],
+      alphabet: ['a', 'b'],
+      transitionFunction: {
+        q0: { a: ['q1'] },
+        q1: { [EPSILON]: ['q2'] },
+        q2: { b: ['q3'] },
       },
-    });
+      acceptStates: ['q3'],
+      initialState: 'q0',
+    };
+    expect(joinedMachine.getStates())
+      .toStrictEqual(expectedParams.states);
+    expect(joinedMachine.getAlphabet())
+      .toStrictEqual(expectedParams.alphabet);
+    expect(joinedMachine.getTransitions())
+      .toStrictEqual(expectedParams.transitionFunction);
+    expect(joinedMachine.getAcceptStates())
+      .toStrictEqual(expectedParams.acceptStates);
+    expect(joinedMachine.getInitialState())
+      .toBe(expectedParams.initialState);
   });
 });

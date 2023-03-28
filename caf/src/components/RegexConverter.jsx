@@ -1,45 +1,41 @@
 import React, { useState } from 'react';
 import Machine, { EPSILON } from '../classes/Machine';
 
-function epsilonToMachine(prefix) {
-  const states = [`${prefix}0`, `${prefix}1`];
-  const alphabet = [];
-  const transitionFunction = {
-    [states[0]]: {
-      [EPSILON]: [states[1]],
-    },
-  };
-  const acceptStates = [states[1]];
-  const initialState = states[0];
-  const params = {
-    states,
-    alphabet,
-    transitionFunction,
-    acceptStates,
-    initialState,
-  };
-  return new Machine(params);
-}
+export function joinMachines(machine1, machine2) {
+  const states = []
+    .concat(machine1.getStates())
+    .concat(machine2.getStates());
 
-function sequenceToMachine(regex, prefix) {
-  const states = [`${prefix}0`];
-  Array.from(regex).forEach((letter, index) => {
-    states.push(`${prefix}${index + 1}`);
-  });
-  const alphabet = [];
-  Array.from(regex).forEach((letter) => {
+  const alphabet = machine1.getAlphabet();
+  machine2.getAlphabet().forEach((letter) => {
     if (alphabet.includes(letter)) return;
     alphabet.push(letter);
   });
+
   const transitionFunction = {};
-  Array.from(regex).forEach((letter, index) => {
-    const stateFrom = states[index];
-    const stateTo = states[index + 1];
-    const transition = { [letter]: [stateTo] };
-    transitionFunction[stateFrom] = transition;
+  const transitions1 = machine1.getTransitions();
+  const transitions2 = machine2.getTransitions();
+  Object.keys(transitions1).forEach((stateFrom) => {
+    const transitionsFrom = machine1.getTransitions(stateFrom);
+    Object.keys(transitionsFrom).forEach((letter) => {
+      const statesTo = machine1.getTransitions(stateFrom, letter);
+      transitionFunction[stateFrom] = { [letter]: statesTo };
+    });
   });
-  const acceptStates = [`${prefix}${regex.length}`];
-  const initialState = [`${prefix}0`];
+  Object.keys(transitions2).forEach((stateFrom) => {
+    const transitionsFrom = machine2.getTransitions(stateFrom);
+    Object.keys(transitionsFrom).forEach((letter) => {
+      const statesTo = machine2.getTransitions(stateFrom, letter);
+      transitionFunction[stateFrom] = { [letter]: statesTo };
+    });
+  });
+  transitionFunction[machine1.getAcceptStates()[0]] = {
+    [EPSILON]: [machine2.getInitialState()],
+  };
+
+  const acceptStates = machine2.getAcceptStates();
+  const initialState = machine1.getInitialState();
+
   const params = {
     states,
     alphabet,
@@ -51,8 +47,7 @@ function sequenceToMachine(regex, prefix) {
 }
 
 export function convertRegex(regex) {
-  if (regex === EPSILON) return epsilonToMachine('q');
-  return sequenceToMachine(regex, 'q');
+  return new Machine();
 }
 
 function RegexConverter() {
