@@ -1,8 +1,79 @@
 import {
   joinMachines,
   matchParentheses,
+  regexToMachine,
+  splitRegexIntoTokens,
+  TOKEN_TYPE,
 } from './RegexConverter';
 import Machine, { EPSILON } from '../classes/Machine';
+
+describe.each([
+  {
+    regex: 'ab',
+    expected: [
+      {
+        type: TOKEN_TYPE.symbol,
+        content: 'a',
+      },
+      {
+        type: TOKEN_TYPE.symbol,
+        content: 'b',
+      },
+    ],
+  },
+  {
+    regex: '(ab)c',
+    expected: [
+      {
+        type: TOKEN_TYPE.parenthetical,
+        content: 'ab',
+      },
+      {
+        type: TOKEN_TYPE.symbol,
+        content: 'c',
+      },
+    ],
+  },
+  {
+    regex: 'a*',
+    expected: [
+      {
+        type: TOKEN_TYPE.symbol,
+        content: 'a',
+      },
+      {
+        type: TOKEN_TYPE.kleeneStar,
+        content: '*',
+      },
+    ],
+  },
+  {
+    regex: 'a|b',
+    expected: [
+      {
+        type: TOKEN_TYPE.symbol,
+        content: 'a',
+      },
+      {
+        type: TOKEN_TYPE.union,
+        content: '|',
+      },
+      {
+        type: TOKEN_TYPE.symbol,
+        content: 'b',
+      },
+    ],
+  },
+])('splitRegexIntoTokens', ({ regex, expected }) => {
+  const printableExpected = [];
+  expected.forEach(({ type, content }) => {
+    printableExpected.push(`[${type} ${content}]`);
+  });
+  it(`${regex} => ${printableExpected}`, () => {
+    const tokens = splitRegexIntoTokens(regex);
+    expect(tokens).toStrictEqual(expected);
+  });
+});
 
 describe.each([
   { string: '(a)a', expected: ['a', 'a'] },
@@ -15,6 +86,17 @@ describe.each([
     } catch (err) {
       expect(err.message).toBe(expected);
     }
+  });
+});
+
+describe.each([
+  { regex: 'a' },
+  { regex: 'ab' },
+  { regex: '(ab)c' },
+])('regexToMachine', ({ regex }) => {
+  const machine = regexToMachine(regex);
+  const states = machine.getStates();
+  it(`${regex} => ${states}`, () => {
   });
 });
 

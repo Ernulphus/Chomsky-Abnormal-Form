@@ -111,6 +111,22 @@ export default class Machine {
     return [];
   }
 
+  getTransitionsTo(state) {
+    const transitions = {};
+    Object.keys(this.transitionFunction).forEach((fromState) => {
+      Object.keys(this.transitionFunction[fromState]).forEach((letter) => {
+        const toStates = this.transitionFunction[fromState][letter];
+        if (!toStates.includes(state)) return;
+        if (transitions[letter]) {
+          transitions[letter].push(fromState);
+        } else {
+          transitions[letter] = [fromState];
+        }
+      });
+    });
+    return transitions;
+  }
+
   addTransition(fromState, toState, letter) {
     if (typeof fromState !== 'string') { generateTypeError('addTransition', 'fromState', 'string'); }
     if (typeof toState !== 'string') { generateTypeError('addTransition', 'toState', 'string'); }
