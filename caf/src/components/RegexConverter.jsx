@@ -13,22 +13,18 @@ export function joinMachines(machine1, machine2) {
   });
 
   const transitionFunction = {};
-  const transitions1 = machine1.getTransitions();
-  const transitions2 = machine2.getTransitions();
-  Object.keys(transitions1).forEach((stateFrom) => {
-    const transitionsFrom = machine1.getTransitions(stateFrom);
-    Object.keys(transitionsFrom).forEach((letter) => {
-      const statesTo = machine1.getTransitions(stateFrom, letter);
-      transitionFunction[stateFrom] = { [letter]: statesTo };
+  const addTransitions = (machine) => {
+    const transitions = machine.getTransitions();
+    Object.keys(transitions).forEach((stateFrom) => {
+      const transitionsFrom = machine.getTransitions(stateFrom);
+      Object.keys(transitionsFrom).forEach((letter) => {
+        const statesTo = machine.getTransitions(stateFrom, letter);
+        transitionFunction[stateFrom] = { [letter]: statesTo };
+      });
     });
-  });
-  Object.keys(transitions2).forEach((stateFrom) => {
-    const transitionsFrom = machine2.getTransitions(stateFrom);
-    Object.keys(transitionsFrom).forEach((letter) => {
-      const statesTo = machine2.getTransitions(stateFrom, letter);
-      transitionFunction[stateFrom] = { [letter]: statesTo };
-    });
-  });
+  };
+  addTransitions(machine1);
+  addTransitions(machine2);
   transitionFunction[machine1.getAcceptStates()[0]] = {
     [EPSILON]: [machine2.getInitialState()],
   };
@@ -46,7 +42,7 @@ export function joinMachines(machine1, machine2) {
   return new Machine(params);
 }
 
-export function convertRegex(regex) {
+export function convertRegex() {
   return new Machine();
 }
 

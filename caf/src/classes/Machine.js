@@ -98,7 +98,7 @@ export default class Machine {
 
   getAlphabet() {
     return [...this.alphabet];
-  };
+  }
 
   getTransitions(fromState = '*', letter = '*') {
     if (fromState === '*') return this.transitionFunction;
