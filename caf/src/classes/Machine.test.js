@@ -17,6 +17,17 @@ describe.each([
 });
 
 describe.each([
+  { states: ['q0', 'q1'] },
+  { states: ['q0', 'q1', 'q2', 'q3'] },
+])('getStates()', ({ states }) => {
+  it(`${states}`, () => {
+    const params = { states };
+    const machine = new Machine(params);
+    expect(machine.getStates()).toStrictEqual(states);
+  });
+});
+
+describe.each([
   { states: ['q0'], transitionFunction: { q0: { a: ['q0'] } } },
   { states: ['q0', 'q1'], transitionFunction: { q1: { a: ['q0'] } } },
   {

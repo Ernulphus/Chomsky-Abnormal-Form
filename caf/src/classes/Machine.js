@@ -71,6 +71,10 @@ export default class Machine {
     return this.states;
   }
 
+  getStates() {
+    return [...this.states];
+  }
+
   hasState(name) {
     if (this.states.includes(name)) return true;
     return false;
