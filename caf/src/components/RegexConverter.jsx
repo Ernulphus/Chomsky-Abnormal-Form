@@ -213,6 +213,28 @@ function unionToMachine(machineA, machineB) {
   return machine;
 }
 
+function kleeneStarToMachine(starMachine) {
+  const states = ['q0', 'q1', 'q2'];
+  const alphabet = [];
+  const transitionFunction = {
+    q0: { [EPSILON]: ['q1', 'q2'] },
+    q1: { [EPSILON]: ['q0', 'q2'] },
+  };
+  const acceptStates = ['q2'];
+  const initialState = 'q0';
+  const params = {
+    states,
+    alphabet,
+    transitionFunction,
+    acceptStates,
+    initialState,
+  };
+
+  const machine = new Machine(params);
+  replaceStateWithMachine(machine, 'q1', starMachine);
+  return machine;
+}
+
 export function regexToMachine(regex) {
   let tokens = splitRegexIntoTokens(regex);
   let machine = new Machine(EMPTY_PARAMS);
@@ -221,7 +243,11 @@ export function regexToMachine(regex) {
     const secondToken = (tokens.length > 1 ? tokens[1] : undefined);
     const thirdToken = (tokens.length > 2 ? tokens[2] : undefined);
     if (secondToken && secondToken.type === TOKEN_TYPE.kleeneStar) {
-      console.log('kleene star is to-do');
+      const starMachine = regexToMachine(firstToken.content);
+      machine = joinMachines(
+        machine,
+        kleeneStarToMachine(starMachine),
+      );
       tokens = tokens.slice(2);
     } else if (secondToken && secondToken.type === TOKEN_TYPE.union) {
       if (!thirdToken) throw new Error('no second argument to union');
