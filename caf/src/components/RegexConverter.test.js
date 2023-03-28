@@ -93,6 +93,8 @@ describe.each([
   { regex: 'a' },
   { regex: 'ab' },
   { regex: '(ab)c' },
+  { regex: '(ab)|c' },
+  { regex: '(ab)*c' },
 ])('regexToMachine', ({ regex }) => {
   const machine = regexToMachine(regex);
   const states = machine.getStates();

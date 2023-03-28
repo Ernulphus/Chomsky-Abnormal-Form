@@ -45,12 +45,11 @@ export function replaceStateWithMachine(patientMachine, stateToReplace, replacem
 
   const transitionsFromReplacedState = patientMachine.getTransitions(stateToReplace);
   const acceptStatesOldNames = replacementMachine.getAcceptStates();
-  acceptStatesOldNames.forEach((oldName) => {
-    transitionsFromReplacedState.forEach((transition) => {
-      Object.keys(transition).forEach((letter) => {
-        transition[letter].forEach((toState) => {
-          patientMachine.addTransition(nameMap[oldName], toState, letter);
-        });
+  Object.keys(transitionsFromReplacedState).forEach((letter) => {
+    const statesTo = patientMachine.getTransitions(stateToReplace, letter);
+    statesTo.forEach((stateTo) => {
+      acceptStatesOldNames.forEach((oldName) => {
+        patientMachine.addTransition(nameMap[oldName], stateTo, letter);
       });
     });
   });
@@ -164,7 +163,7 @@ export function splitRegexIntoTokens(regex) {
         break;
       default:
         newToken.type = TOKEN_TYPE.symbol;
-        newToken.content = [remainingExpression];
+        [newToken.content] = remainingExpression;
         remainingExpression = remainingExpression.slice(1);
     }
     tokens.push(newToken);
@@ -190,27 +189,67 @@ function symbolToMachine(symbol) {
   return new Machine(params);
 }
 
+function unionToMachine(machineA, machineB) {
+  const states = ['q0', 'q1', 'q2', 'q3'];
+  const alphabet = [];
+  const transitionFunction = {
+    q0: { [EPSILON]: ['q1', 'q2'] },
+    q1: { [EPSILON]: ['q3'] },
+    q2: { [EPSILON]: ['q3'] },
+  };
+  const acceptStates = ['q3'];
+  const initialState = 'q0';
+  const params = {
+    states,
+    alphabet,
+    transitionFunction,
+    acceptStates,
+    initialState,
+  };
+
+  const machine = new Machine(params);
+  replaceStateWithMachine(machine, 'q1', machineA);
+  replaceStateWithMachine(machine, 'q2', machineB);
+  return machine;
+}
+
 export function regexToMachine(regex) {
   let tokens = splitRegexIntoTokens(regex);
   let machine = new Machine(EMPTY_PARAMS);
   while (tokens.length > 0) {
     const firstToken = tokens[0];
-    switch (firstToken.type) {
-      case TOKEN_TYPE.parenthetical:
-        machine = joinMachines(
-          machine,
-          regexToMachine(firstToken.content),
-        );
-        break;
-      case TOKEN_TYPE.symbol:
-        machine = joinMachines(
-          machine,
-          symbolToMachine(firstToken.content),
-        );
-        break;
-      default:
+    const secondToken = (tokens.length > 1 ? tokens[1] : undefined);
+    const thirdToken = (tokens.length > 2 ? tokens[2] : undefined);
+    if (secondToken && secondToken.type === TOKEN_TYPE.kleeneStar) {
+      console.log('kleene star is to-do');
+      tokens = tokens.slice(2);
+    } else if (secondToken && secondToken.type === TOKEN_TYPE.union) {
+      if (!thirdToken) throw new Error('no second argument to union');
+      const machineA = regexToMachine(firstToken.content);
+      const machineB = regexToMachine(thirdToken.content);
+      machine = joinMachines(
+        machine,
+        unionToMachine(machineA, machineB),
+      );
+      tokens = tokens.slice(3);
+    } else {
+      switch (firstToken.type) {
+        case TOKEN_TYPE.parenthetical:
+          machine = joinMachines(
+            machine,
+            regexToMachine(firstToken.content),
+          );
+          break;
+        case TOKEN_TYPE.symbol:
+          machine = joinMachines(
+            machine,
+            symbolToMachine(firstToken.content),
+          );
+          break;
+        default:
+      }
+      tokens = tokens.slice(1);
     }
-    tokens = tokens.slice(1);
   }
   return machine;
 }
