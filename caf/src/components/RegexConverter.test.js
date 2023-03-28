@@ -1,5 +1,22 @@
-import { joinMachines } from './RegexConverter';
+import {
+  joinMachines,
+  matchParentheses,
+} from './RegexConverter';
 import Machine, { EPSILON } from '../classes/Machine';
+
+describe.each([
+  { string: '(a)a', expected: ['a', 'a'] },
+  { string: '((a)', expected: 'unbalanced parentheses' },
+  { string: '(a))', expected: ['a', ')'] },
+])('matchParentheses', ({ string, expected }) => {
+  it(`${string} => [${expected}]`, () => {
+    try {
+      expect(matchParentheses(string)).toStrictEqual(expected);
+    } catch (err) {
+      expect(err.message).toBe(expected);
+    }
+  });
+});
 
 describe('joinMachines()', () => {
   it('joins 2 NFAs', () => {

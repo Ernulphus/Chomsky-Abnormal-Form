@@ -42,8 +42,20 @@ export function joinMachines(machine1, machine2) {
   return new Machine(params);
 }
 
-export function convertRegex() {
-  return new Machine();
+export function matchParentheses(string) {
+  if (string[0] !== '(') return ['', string];
+  let unclosedParenAmount = 0;
+  for (let i = 0; i < string.length; i += 1) {
+    if (string[i] === '(') unclosedParenAmount += 1;
+    if (string[i] === ')') unclosedParenAmount -= 1;
+    if (unclosedParenAmount === 0) {
+      return [
+        string.slice(1, i),
+        string.slice(i + 1),
+      ];
+    }
+  }
+  throw new Error('unbalanced parentheses');
 }
 
 function RegexConverter() {
