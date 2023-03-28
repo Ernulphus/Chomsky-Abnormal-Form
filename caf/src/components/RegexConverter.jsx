@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import propTypes from 'prop-types';
 import Machine, { EPSILON } from '../classes/Machine';
 
 const EMPTY_PARAMS = {
@@ -280,16 +281,85 @@ export function regexToMachine(regex) {
   return machine;
 }
 
+function MachineDetails({ machine }) {
+  if (!machine) return null;
+  const states = machine.getStates();
+  const alphabet = machine.getAlphabet();
+  const transitionFunctionHeaders = [<th>letter</th>];
+  const transitionFunctionRows = {
+    [EPSILON]: [<td key="epsilonlabel">{EPSILON}</td>],
+  };
+  alphabet.forEach((letter) => {
+    transitionFunctionRows[letter] = [<td key={`${letter}label`}>{letter}</td>];
+  });
+  states.forEach((state) => {
+    transitionFunctionHeaders.push(<th key={state}>{state}</th>);
+    const transFrom = machine.getTransitions(state);
+    Object.keys(transFrom).forEach((letter) => {
+      transitionFunctionRows[letter].push(<td key={`${letter}${state}`}>{transFrom[letter]}</td>);
+    });
+  });
+  console.log(machine.getTransitions());
+  const transitionRowJSX = Object.keys(transitionFunctionRows).map((letter) => (
+    <tr key={`${letter}row`}>
+      {transitionFunctionRows[letter]}
+    </tr>
+  ));
+
+  return (
+    <div>
+      <section>
+        <h2>States</h2>
+        {states}
+      </section>
+      <section>
+        <h2>Alphabet</h2>
+        {alphabet}
+      </section>
+      <section>
+        <h2>Transition Function</h2>
+        <table>
+          <thead>
+            <tr>
+              {transitionFunctionHeaders}
+            </tr>
+          </thead>
+          <tbody>
+            {transitionRowJSX}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
+
+MachineDetails.propTypes = {
+  machine: propTypes.instanceOf(Object),
+};
+
+MachineDetails.defaultProps = {
+  machine: null,
+};
+
 function RegexConverter() {
   const [regex, setRegex] = useState('');
+  const [machine, setMachine] = useState();
+
+  const submitHandler = () => {
+    setMachine(regexToMachine(regex));
+  };
 
   return (
     <div>
       <input
         placeholder="Enter regular expression here"
-        onChange={setRegex}
+        onChange={(e) => { setRegex(e.target.value); }}
         value={regex}
       />
+      <button type="button" onClick={submitHandler}>
+        Convert
+      </button>
+      <MachineDetails machine={machine} />
     </div>
   );
 }
