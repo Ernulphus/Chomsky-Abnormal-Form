@@ -140,6 +140,14 @@ export default class Machine {
     return this.acceptStates;
   }
 
+  setInitialState(state) {
+    this.initialState = state;
+  }
+
+  getInitialState() {
+    return this.initialState;
+  }
+
   acceptsWord(word, state = this.initialState) {
     if (typeof word !== 'string') { generateTypeError('acceptsWord', 'word', 'string'); }
 
