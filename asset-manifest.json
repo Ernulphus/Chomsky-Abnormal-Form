@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/Chomsky-Abnormal-Form/static/css/main.d4b1f578.css",
-    "main.js": "/Chomsky-Abnormal-Form/static/js/main.14e24d35.js",
+    "main.css": "/Chomsky-Abnormal-Form/static/css/main.35a7c855.css",
+    "main.js": "/Chomsky-Abnormal-Form/static/js/main.ed5ae84b.js",
     "static/js/787.7d14c2bb.chunk.js": "/Chomsky-Abnormal-Form/static/js/787.7d14c2bb.chunk.js",
     "index.html": "/Chomsky-Abnormal-Form/index.html",
-    "main.d4b1f578.css.map": "/Chomsky-Abnormal-Form/static/css/main.d4b1f578.css.map",
-    "main.14e24d35.js.map": "/Chomsky-Abnormal-Form/static/js/main.14e24d35.js.map",
+    "main.35a7c855.css.map": "/Chomsky-Abnormal-Form/static/css/main.35a7c855.css.map",
+    "main.ed5ae84b.js.map": "/Chomsky-Abnormal-Form/static/js/main.ed5ae84b.js.map",
     "787.7d14c2bb.chunk.js.map": "/Chomsky-Abnormal-Form/static/js/787.7d14c2bb.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.d4b1f578.css",
-    "static/js/main.14e24d35.js"
+    "static/css/main.35a7c855.css",
+    "static/js/main.ed5ae84b.js"
   ]
 }
