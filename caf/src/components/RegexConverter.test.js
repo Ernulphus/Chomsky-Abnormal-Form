@@ -4,6 +4,7 @@ import {
   regexToMachine,
   splitRegexIntoTokens,
   TOKEN_TYPE,
+  symbolToMachine,
 } from './RegexConverter';
 import Machine, { EPSILON } from '../classes/Machine';
 
@@ -97,53 +98,87 @@ describe.each([
   { regex: '(ab)*c' },
 ])('regexToMachine', ({ regex }) => {
   const machine = regexToMachine(regex);
-  const states = machine.getStates();
-  it(`${regex} => ${states}`, () => {
+  const jsRegex = new RegExp(`^(${regex})$`);
+  const words = [
+    'a',
+    'ab',
+    'abc',
+    'c',
+    'ababc',
+    'd',
+    [EPSILON],
+  ];
+  words.forEach((word) => {
+    const shouldAccept = jsRegex.test(word);
+    it(`/${regex}/: ${word} => ${shouldAccept}`, () => {
+      const path = machine.acceptsWord(word);
+      const result = path.length > 0;
+      expect(result).toBe(shouldAccept);
+    });
+  });
+});
+
+describe('symbolToMachine', () => {
+  it('q0 =a=> q1', () => {
+    const expected = {
+      q0: { a: ['q1'] },
+    };
+    const transitionFunction = symbolToMachine('a').getTransitions();
+    expect(transitionFunction).toStrictEqual(expected);
   });
 });
 
 describe('joinMachines()', () => {
-  it('joins 2 NFAs', () => {
-    const params1 = {
-      states: ['q0', 'q1'],
-      alphabet: ['a'],
-      transitionFunction: {
-        q0: { a: ['q1'] },
-      },
-      acceptStates: ['q1'],
-      initialState: 'q0',
-    };
-    const params2 = {
-      states: ['q2', 'q3'],
-      alphabet: ['b'],
-      transitionFunction: {
-        q2: { b: ['q3'] },
-      },
-      acceptStates: ['q3'],
-      initialState: 'q2',
-    };
-    const machine1 = new Machine(params1);
-    const machine2 = new Machine(params2);
-    const joinedMachine = joinMachines(machine1, machine2);
-    const expectedParams = {
-      states: ['q0', 'q1', 'q2', 'q3'],
-      alphabet: ['a', 'b'],
-      transitionFunction: {
-        q0: { a: ['q1'] },
-        q1: { [EPSILON]: ['q2'] },
-        q2: { b: ['q3'] },
-      },
-      acceptStates: ['q3'],
-      initialState: 'q0',
-    };
+  const params1 = {
+    states: ['q0', 'q1'],
+    alphabet: ['a'],
+    transitionFunction: {
+      q0: { a: ['q1'] },
+    },
+    acceptStates: ['q1'],
+    initialState: 'q0',
+  };
+  const params2 = {
+    states: ['q0', 'q1'],
+    alphabet: ['b'],
+    transitionFunction: {
+      q0: { b: ['q1'] },
+    },
+    acceptStates: ['q1'],
+    initialState: 'q0',
+  };
+  const machine1 = new Machine(params1);
+  const machine2 = new Machine(params2);
+  const joinedMachine = joinMachines(machine1, machine2);
+  const expectedParams = {
+    states: ['q0', 'q1', 'q2', 'q3'],
+    alphabet: ['a', 'b'],
+    transitionFunction: {
+      q0: { a: ['q1'] },
+      q1: { [EPSILON]: ['q2'] },
+      q2: { b: ['q3'] },
+    },
+    acceptStates: ['q3'],
+    initialState: 'q0',
+  };
+
+  it('states are correct', () => {
     expect(joinedMachine.getStates())
       .toStrictEqual(expectedParams.states);
+  });
+  it('alphabet is correct', () => {
     expect(joinedMachine.getAlphabet())
       .toStrictEqual(expectedParams.alphabet);
+  });
+  it('transitions are correct', () => {
     expect(joinedMachine.getTransitions())
       .toStrictEqual(expectedParams.transitionFunction);
+  });
+  it('acceptStates are correct', () => {
     expect(joinedMachine.getAcceptStates())
       .toStrictEqual(expectedParams.acceptStates);
+  });
+  it('initialState is correct', () => {
     expect(joinedMachine.getInitialState())
       .toBe(expectedParams.initialState);
   });

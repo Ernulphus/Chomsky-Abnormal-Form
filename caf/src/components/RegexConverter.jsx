@@ -89,18 +89,25 @@ export function joinMachines(machine1, machine2) {
       Object.keys(transitionsFrom).forEach((letter) => {
         const oldStatesTo = machine.getTransitions(stateFrom, letter);
         const newStatesTo = oldStatesTo.map((oldName) => nameMap[oldName]);
-        transitionFunction[stateFrom] = { [letter]: newStatesTo };
+        const newStateFrom = nameMap[stateFrom];
+        transitionFunction[newStateFrom] = { [letter]: newStatesTo };
       });
     });
   };
   addTransitions(machine1, nameMap1);
   addTransitions(machine2, nameMap2);
-  transitionFunction[machine1.getAcceptStates()[0]] = {
-    [EPSILON]: [machine2.getInitialState()],
+
+  const oldM1Final = machine1.getAcceptStates()[0];
+  const oldM2Initial = machine1.getInitialState();
+  const newM1Final = nameMap1[oldM1Final];
+  const newM2Initial = nameMap2[oldM2Initial];
+  transitionFunction[newM1Final] = {
+    [EPSILON]: [newM2Initial],
   };
 
-  const acceptStates = machine2.getAcceptStates();
-  const initialState = machine1.getInitialState();
+  const [oldAcceptState] = machine2.getAcceptStates();
+  const acceptStates = [nameMap2[oldAcceptState]];
+  const initialState = nameMap1[machine1.getInitialState()];
 
   const params = {
     states,
@@ -109,7 +116,9 @@ export function joinMachines(machine1, machine2) {
     acceptStates,
     initialState,
   };
-  return new Machine(params);
+
+  const newMachine = new Machine(params);
+  return newMachine;
 }
 
 export function matchParentheses(string) {
@@ -172,7 +181,7 @@ export function splitRegexIntoTokens(regex) {
   return tokens;
 }
 
-function symbolToMachine(symbol) {
+export function symbolToMachine(symbol) {
   const states = ['q0', 'q1'];
   const alphabet = [symbol];
   const transitionFunction = {
@@ -241,17 +250,21 @@ export function regexToMachine(regex) {
   let machine = new Machine(EMPTY_PARAMS);
   while (tokens.length > 0) {
     const firstToken = tokens[0];
-    const secondToken = (tokens.length > 1 ? tokens[1] : undefined);
-    const thirdToken = (tokens.length > 2 ? tokens[2] : undefined);
-    if (secondToken && secondToken.type === TOKEN_TYPE.kleeneStar) {
+
+    const kleeneStar = tokens.length > 1 && tokens[1].type === TOKEN_TYPE.kleeneStar;
+    const parenthetical = tokens[0].type === TOKEN_TYPE.parenthetical;
+    const union = tokens.length > 2 && tokens[1].type === TOKEN_TYPE.union;
+    const symbol = tokens[0].type === TOKEN_TYPE.symbol;
+
+    if (kleeneStar) {
       const starMachine = regexToMachine(firstToken.content);
       machine = joinMachines(
         machine,
         kleeneStarToMachine(starMachine),
       );
       tokens = tokens.slice(2);
-    } else if (secondToken && secondToken.type === TOKEN_TYPE.union) {
-      if (!thirdToken) throw new Error('no second argument to union');
+    } else if (union) {
+      const thirdToken = (tokens.length > 2 ? tokens[2] : undefined);
       const machineA = regexToMachine(firstToken.content);
       const machineB = regexToMachine(thirdToken.content);
       machine = joinMachines(
@@ -259,23 +272,20 @@ export function regexToMachine(regex) {
         unionToMachine(machineA, machineB),
       );
       tokens = tokens.slice(3);
-    } else {
-      switch (firstToken.type) {
-        case TOKEN_TYPE.parenthetical:
-          machine = joinMachines(
-            machine,
-            regexToMachine(firstToken.content),
-          );
-          break;
-        case TOKEN_TYPE.symbol:
-          machine = joinMachines(
-            machine,
-            symbolToMachine(firstToken.content),
-          );
-          break;
-        default:
-      }
+    } else if (parenthetical) {
+      machine = joinMachines(
+        machine,
+        regexToMachine(firstToken.content),
+      );
       tokens = tokens.slice(1);
+    } else if (symbol) {
+      machine = joinMachines(
+        machine,
+        symbolToMachine(firstToken.content),
+      );
+      tokens = tokens.slice(1);
+    } else {
+      throw new Error('invalid token');
     }
   }
   return machine;
@@ -285,47 +295,42 @@ function MachineDetails({ machine }) {
   if (!machine) return null;
   const states = machine.getStates();
   const alphabet = machine.getAlphabet();
-  const transitionFunctionHeaders = [<th>letter</th>];
-  const transitionFunctionRows = {
-    [EPSILON]: [<td key="epsilonlabel">{EPSILON}</td>],
-  };
-  alphabet.forEach((letter) => {
-    transitionFunctionRows[letter] = [<td key={`${letter}label`}>{letter}</td>];
-  });
-  states.forEach((state) => {
-    transitionFunctionHeaders.push(<th key={state}>{state}</th>);
-    const transFrom = machine.getTransitions(state);
-    Object.keys(transFrom).forEach((letter) => {
-      transitionFunctionRows[letter].push(<td key={`${letter}${state}`}>{transFrom[letter]}</td>);
+  const alphabetWithEpsilon = [EPSILON].concat(alphabet);
+
+  const transitionTableHeaders = states.map((state) => <th key={state}>{state}</th>);
+  const transitionTableRows = alphabetWithEpsilon.map((letter) => {
+    const cells = [<td key={letter}>{letter}</td>];
+    states.forEach((stateFrom) => {
+      cells.push((
+        <td key={`${stateFrom}${letter}`}>
+          {machine.getTransitions(stateFrom, letter).join(', ')}
+        </td>
+      ));
     });
+    return <tr>{cells}</tr>;
   });
-  console.log(machine.getTransitions());
-  const transitionRowJSX = Object.keys(transitionFunctionRows).map((letter) => (
-    <tr key={`${letter}row`}>
-      {transitionFunctionRows[letter]}
-    </tr>
-  ));
 
   return (
     <div>
       <section>
         <h2>States</h2>
-        {states}
+        {states.join(', ')}
       </section>
       <section>
         <h2>Alphabet</h2>
-        {alphabet}
+        {alphabet.join(', ')}
       </section>
       <section>
         <h2>Transition Function</h2>
         <table>
           <thead>
             <tr>
-              {transitionFunctionHeaders}
+              <th>From:</th>
+              {transitionTableHeaders}
             </tr>
           </thead>
           <tbody>
-            {transitionRowJSX}
+            {transitionTableRows}
           </tbody>
         </table>
       </section>
