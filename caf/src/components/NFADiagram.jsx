@@ -163,6 +163,14 @@ function NFADiagram() {
     drawStates(ctx);
   };
 
+  const getNewStateName = () => {
+    let i = 0;
+    while (true) {
+      if (!machine.states.includes(`q${i}`)) return `q${i}`;
+      i += 1;
+    }
+  };
+
   const handleClick = (e) => {
     const canvX = e.clientX - e.target.offsetLeft; // X position on canvas of click
     const canvY = e.clientY - e.target.offsetTop; // Y position on canvas of click
@@ -201,7 +209,7 @@ function NFADiagram() {
         }
         // If no state is selected,
         // Create a new state at the location of the double click
-        const newName = `q${stateCounter}`;
+        const newName = getNewStateName();
         setStateCounter(stateCounter + 1);
         machine.addState(newName);
         stateCoords[newName] = [canvX, canvY];
