@@ -346,12 +346,14 @@ MachineDetails.defaultProps = {
   machine: null,
 };
 
-function RegexConverter() {
+function RegexConverter({ sendNewMachine }) {
   const [regex, setRegex] = useState('');
   const [machine, setMachine] = useState();
 
   const submitHandler = () => {
-    setMachine(regexToMachine(regex));
+    const newMachine = regexToMachine(regex);
+    setMachine(newMachine);
+    sendNewMachine(newMachine);
   };
 
   return (
@@ -368,5 +370,13 @@ function RegexConverter() {
     </div>
   );
 }
+
+RegexConverter.propTypes = {
+  sendNewMachine: propTypes.func,
+};
+
+RegexConverter.defaultProps = {
+  sendNewMachine: () => {},
+};
 
 export default RegexConverter;

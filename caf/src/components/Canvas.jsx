@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types'; /* eslint-disable-line */
+import { CANVAS_WIDTH, CANVAS_HEIGHT } from '../constants';
 
 function Canvas({
   draw,
@@ -30,8 +31,8 @@ function Canvas({
 
   return (
     <canvas
-      width="700"
-      height="400"
+      width={CANVAS_WIDTH}
+      height={CANVAS_HEIGHT}
       tabIndex="0"
       ref={canvasRef}
       onClick={onClick}

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Canvas from './Canvas';
+import RegexConverter from './RegexConverter';
 import Machine from '../classes/Machine';
+import { CANVAS_WIDTH } from '../constants';
 
 const MOUSE_BUTTON = {
   leftClick: 0,
@@ -35,8 +37,16 @@ function Instructions() {
 
 function generateInitialCoordinates(states) {
   const coordinates = {};
-  states.forEach((state, index) => {
-    coordinates[state] = [(index + 1) * 100, 100];
+  let xOffset = 0;
+  let yOffset = 1;
+  const spaceBetween = 75;
+  states.forEach((state) => {
+    coordinates[state] = [(xOffset + 1) * spaceBetween, yOffset * spaceBetween];
+    xOffset += 1;
+    if ((xOffset + 1) * spaceBetween > CANVAS_WIDTH) {
+      xOffset = 0;
+      yOffset += 1;
+    }
   });
   return coordinates;
 }
@@ -47,8 +57,17 @@ function NFADiagram() {
   const [stateName, setStateName] = useState('');
   const [stateCounter, setStateCounter] = useState(1);
 
-  const [machine] = useState(new Machine());
-  const [stateCoords] = useState(generateInitialCoordinates(machine.states));
+  const [machine, setMachine] = useState(new Machine());
+  const [stateCoords, setStateCoords] = useState(generateInitialCoordinates(machine.states));
+
+  const sendNewMachine = (newMachine) => {
+    setMachine(newMachine);
+    setStateCoords(
+      generateInitialCoordinates(
+        newMachine.states,
+      ),
+    );
+  };
 
   const [word, setWord] = useState('');
   const [wordResult, setWordResult] = useState('');
@@ -251,6 +270,7 @@ function NFADiagram() {
       </div>
       <div className="one-quarter-width">
         <Instructions />
+        <RegexConverter sendNewMachine={sendNewMachine} />
       </div>
     </div>
   );
