@@ -106,7 +106,7 @@ describe.each([
     'c',
     'ababc',
     'd',
-    [EPSILON],
+    '',
   ];
   words.forEach((word) => {
     const shouldAccept = jsRegex.test(word);
