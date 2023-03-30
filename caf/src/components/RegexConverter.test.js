@@ -113,6 +113,9 @@ describe.each([
   { regex: '(ab)c' },
   { regex: '(ab)|c' },
   { regex: '(ab)*c' },
+  { regex: '((ab)*bc)' },
+  { regex: '(abc)|(def)' },
+  { regex: '((abc)*abc)|(def)' },
 ])('regexToMachine', ({ regex }) => {
   const machine = regexToMachine(regex);
   const jsRegex = new RegExp(`^(${regex})$`);
@@ -124,6 +127,11 @@ describe.each([
     'ababc',
     'd',
     '',
+    'abbc',
+    'bc',
+    'ababbc',
+    'def',
+    'abcabcdef',
   ];
   words.forEach((word) => {
     const shouldAccept = jsRegex.test(word);
