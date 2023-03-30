@@ -1,12 +1,29 @@
 import {
+  printTransitionFunction,
   joinMachines,
   matchParentheses,
   regexToMachine,
   splitRegexIntoTokens,
   TOKEN_TYPE,
   symbolToMachine,
+  unionToMachine,
 } from './RegexConverter';
 import Machine, { EPSILON } from '../classes/Machine';
+
+describe.each([
+  { letter: 'a', expected: true },
+  { letter: 'b', expected: true },
+  { letter: 'ab', expected: false },
+  { letter: 'c', expected: false },
+])('unionToMachine', ({ letter, expected }) => {
+  it(`a|b, ${letter} => ${expected}`, () => {
+    const machineA = symbolToMachine('a');
+    const machineB = symbolToMachine('b');
+    const machine = unionToMachine(machineA, machineB);
+    const response = machine.acceptsWord(letter).length > 0;
+    expect(response).toBe(expected);
+  });
+});
 
 describe.each([
   {

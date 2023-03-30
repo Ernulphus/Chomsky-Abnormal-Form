@@ -2,6 +2,35 @@ import React, { useState } from 'react';
 import propTypes from 'prop-types';
 import Machine, { EPSILON } from '../classes/Machine';
 
+export function printTransitionFunction(machine) {
+  const states = machine.getStates();
+  const alphabet = machine.getAlphabet().concat([EPSILON]);
+  const maxLengths = {};
+  let output = machine.getInitialState().concat('\n  |');
+  states.forEach((state) => {
+    maxLengths[state] = 1;
+    Object.keys(machine.getTransitions(state)).forEach((letter) => {
+      if (machine.getTransitions(state, letter).length > maxLengths[state]) {
+        maxLengths[state] = machine.getTransitions(state, letter).length;
+      }
+    });
+    let toString = state;
+    while (toString.length < maxLengths[state] * 3) { toString = toString.concat(' '); }
+    output = output.concat(` ${toString}|`);
+  });
+  alphabet.forEach((letter) => {
+    let rowString = `${letter} |`;
+    states.forEach((state) => {
+      let toString = machine.getTransitions(state, letter).join();
+      while (toString.length < maxLengths[state] * 3) { toString = toString.concat(' '); }
+      rowString = rowString.concat(` ${toString}|`);
+    });
+    output = output.concat(`\n${rowString}`);
+  });
+  output = output.concat('\n').concat(machine.getAcceptStates().join());
+  console.log(output);
+};
+
 const EMPTY_PARAMS = {
   states: ['q0', 'q1'],
   alphabet: [],
@@ -12,11 +41,20 @@ const EMPTY_PARAMS = {
   initialState: 'q0',
 };
 
+function ensureNameOrder(machine) {
+  const initialNames = machine.getStates();
+  initialNames.forEach((name, index) => {
+    const oldTransitions = JSON.stringify(machine.getTransitions(name));
+    machine.renameState(name, `q${index}`);
+    const newTransitions = JSON.stringify(machine.getTransitions(`q${index}`));
+  });
+}
+
 export function replaceStateWithMachine(patientMachine, stateToReplace, replacementMachine) {
   const nameMap = {};
-  replacementMachine.getStates().forEach((state) => {
+  replacementMachine.getStates().forEach((oldName) => {
     const index = patientMachine.getStates().length + Object.keys(nameMap).length;
-    nameMap[state] = `q${index}`;
+    nameMap[oldName] = `q${index}`;
   });
   Object.keys(nameMap).forEach((state) => {
     patientMachine.addState(nameMap[state]);
@@ -56,6 +94,7 @@ export function replaceStateWithMachine(patientMachine, stateToReplace, replacem
   });
 
   patientMachine.deleteState(stateToReplace);
+  ensureNameOrder(patientMachine);
   return patientMachine;
 }
 
@@ -199,7 +238,7 @@ export function symbolToMachine(symbol) {
   return new Machine(params);
 }
 
-function unionToMachine(machineA, machineB) {
+export function unionToMachine(machineA, machineB) {
   const states = ['q0', 'q1', 'q2', 'q3'];
   const alphabet = [];
   const transitionFunction = {
@@ -219,7 +258,7 @@ function unionToMachine(machineA, machineB) {
 
   const machine = new Machine(params);
   replaceStateWithMachine(machine, 'q1', machineA);
-  replaceStateWithMachine(machine, 'q2', machineB);
+  replaceStateWithMachine(machine, 'q1', machineB);
   return machine;
 }
 

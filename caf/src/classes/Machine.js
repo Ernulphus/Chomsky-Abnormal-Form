@@ -32,6 +32,7 @@ export default class Machine {
 
     const stateIndex = this.states.indexOf(oldName);
     if (stateIndex === -1) { return null; }
+    if (oldName === newName) return stateIndex;
     this.states[stateIndex] = newName;
 
     Object.keys(this.transitionFunction).forEach((fromState) => {
@@ -50,8 +51,10 @@ export default class Machine {
 
     if (this.initialState === oldName) this.initialState = newName;
 
-    this.acceptStates.push(newName);
-    this.acceptStates = this.acceptStates.filter((state) => state !== oldName);
+    if (this.acceptStates.includes(oldName)) {
+      this.acceptStates.push(newName);
+      this.acceptStates = this.acceptStates.filter((state) => state !== oldName);
+    }
 
     return stateIndex;
   }
@@ -171,12 +174,7 @@ export default class Machine {
   acceptsWord(word, state = this.initialState) {
     if (typeof word !== 'string') { generateTypeError('acceptsWord', 'word', 'string'); }
 
-    if (word.length === 0) {
-      if (this.acceptStates.includes(state)) return [state];
-      return [];
-    }
-
-    const letter = word[0];
+    const letter = word[0] ? word[0] : '';
     const remainingWord = word.slice(1);
     const epsilonPaths = this
       .getTransitions(state, EPSILON)
@@ -187,7 +185,11 @@ export default class Machine {
     const validPaths = epsilonPaths
       .concat(letterPaths)
       .filter((path) => path.length > 0);
-    if (validPaths.length === 0) return [];
+
+    if (validPaths.length === 0) {
+      if (this.acceptStates.includes(state) && word.length === 0) return [state];
+      return [];
+    }
     return [state, ...validPaths[0]];
   }
 }
