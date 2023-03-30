@@ -60,17 +60,24 @@ export default class Machine {
   }
 
   deleteState(stateToRemove) {
-    this.states = this.states.filter((state) => state !== stateToRemove);
+    if (typeof stateToRemove !== 'string') { generateTypeError('deleteState', 'stateToRemove', 'string'); }
+    if (this.getInitialState === stateToRemove) throw new Error('cannot delete initialState');
 
-    if (this.transitionFunction[stateToRemove]) delete this.transitionFunction[stateToRemove];
-    Object.keys(this.transitionFunction).forEach((fromState) => {
-      Object.keys(this.transitionFunction[fromState]).forEach((letter) => {
-        let toStates = this.transitionFunction[fromState][letter];
-        if (!toStates) return;
-        toStates = toStates.filter((toState) => toState !== stateToRemove);
-        this.transitionFunction[fromState][letter] = toStates;
+    const transitionsTo = this.getTransitionsTo(stateToRemove);
+    Object.keys(transitionsTo).forEach((letter) => {
+      transitionsTo[letter].forEach((stateFrom) => {
+        this.removeTransition(stateFrom, stateToRemove, letter);
       });
     });
+    const transitionsFrom = this.getTransitions(stateToRemove);
+    Object.keys(transitionsFrom).forEach((letter) => {
+      transitionsFrom[letter].forEach((stateTo) => {
+        this.removeTransition(stateToRemove, stateTo, letter);
+      });
+    });
+
+    if (this.transitionFunction[stateToRemove]) delete this.transitionFunction[stateToRemove];
+    this.states = this.states.filter((state) => state !== stateToRemove);
     return this.states;
   }
 
@@ -116,15 +123,12 @@ export default class Machine {
 
   getTransitionsTo(state) {
     const transitions = {};
-    Object.keys(this.transitionFunction).forEach((fromState) => {
-      Object.keys(this.transitionFunction[fromState]).forEach((letter) => {
-        const toStates = this.transitionFunction[fromState][letter];
-        if (!toStates.includes(state)) return;
-        if (transitions[letter]) {
-          transitions[letter].push(fromState);
-        } else {
-          transitions[letter] = [fromState];
-        }
+    this.states.forEach((fromState) => {
+      const statesFrom = this.getTransitions(fromState);
+      Object.keys(statesFrom).forEach((letter) => {
+        if (!statesFrom[letter].includes(state)) return;
+        if (!transitions[letter]) { transitions[letter] = [fromState]; return; }
+        transitions[letter].push(fromState);
       });
     });
     return transitions;
@@ -142,6 +146,71 @@ export default class Machine {
     }
     this.transitionFunction[fromState] = transitionsFrom;
     return this.transitionFunction[fromState];
+  }
+
+  removeTransition(fromState, toState, letter) {
+    if (typeof fromState !== 'string') { generateTypeError('addTransition', 'fromState', 'string'); }
+    if (typeof toState !== 'string') { generateTypeError('addTransition', 'toState', 'string'); }
+    if (typeof letter !== 'string') { generateTypeError('addTransition', 'letter', 'string'); }
+    this.transitionFunction[fromState][letter] = this.transitionFunction[fromState][letter]
+      .filter((oldToState) => oldToState !== toState);
+    return this.transitionFunction[fromState];
+  }
+
+  ensureTransitionSafety() {
+    Object.keys(this.transitionFunction).forEach((fromState) => {
+      if (!this.hasState(fromState)) {
+        console.log('deleting', fromState);
+        delete this.transitionFunction[fromState];
+        return;
+      }
+
+      Object.keys(this.transitionFunction[fromState]).forEach((letter) => {
+        if (letter !== EPSILON && !this.alphabet.includes(letter)) {
+          delete this.transitionFunction[fromState][letter];
+          return;
+        }
+        this.transitionFunction[fromState][letter] = this.transitionFunction[fromState][letter]
+          .filter((toState) => this.hasState(toState));
+      });
+    });
+  }
+
+  findEpsilonTransition() {
+    for (let stateIndex = 0; stateIndex < this.states.length; stateIndex += 1) {
+      const state = this.states[stateIndex];
+      const epsilonTransitions = this.getTransitions(state, [EPSILON]);
+      if (epsilonTransitions.length > 0 && epsilonTransitions[0]) {
+        return [state, epsilonTransitions[0]];
+      }
+    }
+    return null;
+  }
+
+  removeEpsilonTransitions() {
+    this.ensureTransitionSafety();
+    let epsilonTransition = this.findEpsilonTransition();
+    while (epsilonTransition) {
+      const [stateFrom, stateTo] = epsilonTransition;
+      const transitionsTo = this.getTransitionsTo(stateFrom);
+      const transitionsFrom = this.getTransitions(stateFrom);
+      Object.keys(transitionsTo).forEach((letter) => {
+        transitionsTo[letter].forEach((newStateFrom) => {
+          this.addTransition(newStateFrom, stateTo, letter);
+        });
+      });
+      Object.keys(transitionsFrom).forEach((letter) => {
+        transitionsFrom[letter].forEach((newStateTo) => {
+          if (stateTo === newStateTo && letter === EPSILON) return;
+          this.addTransition(stateTo, newStateTo, letter);
+        });
+      });
+      if (this.initialState === stateFrom) this.setInitialState(stateTo);
+      if (this.acceptStates.includes(stateFrom)) this.addAcceptState(stateTo);
+      this.deleteState(stateFrom);
+      this.ensureTransitionSafety();
+      epsilonTransition = this.findEpsilonTransition();
+    }
   }
 
   getAcceptStates() {
@@ -173,11 +242,13 @@ export default class Machine {
 
   acceptsWord(word, state = this.initialState) {
     if (typeof word !== 'string') { generateTypeError('acceptsWord', 'word', 'string'); }
+    if (typeof state !== 'string') { generateTypeError('acceptsWord', 'state', 'string'); }
 
     const letter = word[0] ? word[0] : '';
     const remainingWord = word.slice(1);
     const epsilonPaths = this
       .getTransitions(state, EPSILON)
+      .filter((toState) => toState !== state)
       .map((toState) => this.acceptsWord(word, toState));
     const letterPaths = this
       .getTransitions(state, letter)

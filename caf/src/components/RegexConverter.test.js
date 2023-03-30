@@ -200,3 +200,4 @@ describe('joinMachines()', () => {
       .toBe(expectedParams.initialState);
   });
 });
+

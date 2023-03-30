@@ -29,7 +29,7 @@ export function printTransitionFunction(machine) {
   });
   output = output.concat('\n').concat(machine.getAcceptStates().join());
   console.log(output);
-};
+}
 
 const EMPTY_PARAMS = {
   states: ['q0', 'q1'],
@@ -44,9 +44,7 @@ const EMPTY_PARAMS = {
 function ensureNameOrder(machine) {
   const initialNames = machine.getStates();
   initialNames.forEach((name, index) => {
-    const oldTransitions = JSON.stringify(machine.getTransitions(name));
     machine.renameState(name, `q${index}`);
-    const newTransitions = JSON.stringify(machine.getTransitions(`q${index}`));
   });
 }
 
@@ -327,6 +325,9 @@ export function regexToMachine(regex) {
       throw new Error('invalid token');
     }
   }
+  ensureNameOrder(machine);
+  machine.removeEpsilonTransitions();
+  ensureNameOrder(machine);
   return machine;
 }
 
