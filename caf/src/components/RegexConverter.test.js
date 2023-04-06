@@ -153,6 +153,30 @@ describe('symbolToMachine', () => {
   });
 });
 
+describe('complex joinMachines()', () => {
+  const params1 = {
+    states: ['q0', 'q1'],
+    alphabet: [],
+    transitionFunction: { q0: { [EPSILON]: ['q1'] } },
+    acceptStates: ['q1'],
+    initialState: 'q0',
+  };
+  const params2 = {
+    states: ['q0', 'q1', 'q2', 'q3'],
+    alphabet: ['a', 'b', 'c'],
+    transitionFunction: {
+      q0: { a: ['q1'], b: ['q2'] },
+      q1: { b: ['q0'] },
+      q2: { c: ['q3'] },
+    },
+    acceptStates: ['q3'],
+    initialState: 'q0',
+  };
+  const machine1 = new Machine(params1);
+  const machine2 = new Machine(params2);
+  const joint = joinMachines(machine1, machine2);
+});
+
 describe('joinMachines()', () => {
   const params1 = {
     states: ['q0', 'q1'],

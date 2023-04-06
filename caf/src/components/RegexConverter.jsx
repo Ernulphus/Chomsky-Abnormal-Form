@@ -127,7 +127,16 @@ export function joinMachines(machine1, machine2) {
         const oldStatesTo = machine.getTransitions(stateFrom, letter);
         const newStatesTo = oldStatesTo.map((oldName) => nameMap[oldName]);
         const newStateFrom = nameMap[stateFrom];
-        transitionFunction[newStateFrom] = { [letter]: newStatesTo };
+        if (!transitionFunction[newStateFrom]) {
+          transitionFunction[newStateFrom] = { [letter]: newStatesTo };
+          return;
+        }
+        if (!transitionFunction[newStateFrom][letter]) {
+          transitionFunction[newStateFrom][letter] = newStatesTo;
+          return;
+        }
+        transitionFunction[newStateFrom][letter] =
+        transitionFunction[newStateFrom][letter].concat(newStatesTo);
       });
     });
   };
@@ -310,9 +319,10 @@ export function regexToMachine(regex) {
       );
       tokens = tokens.slice(3);
     } else if (parenthetical) {
+      const parenContent = regexToMachine(firstToken.content);
       machine = joinMachines(
         machine,
-        regexToMachine(firstToken.content),
+        parenContent,
       );
       tokens = tokens.slice(1);
     } else if (symbol) {
