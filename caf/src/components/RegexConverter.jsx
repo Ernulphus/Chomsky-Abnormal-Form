@@ -48,12 +48,24 @@ function ensureNameOrder(machine) {
   });
 }
 
-export function replaceStateWithMachine(patientMachine, stateToReplace, replacementMachine) {
-  const nameMap = {};
-  replacementMachine.getStates().forEach((oldName) => {
-    const index = patientMachine.getStates().length + Object.keys(nameMap).length;
-    nameMap[oldName] = `q${index}`;
+function generateNameMaps(machines, offset = 0) {
+  if (!Array.isArray(machines)) throw new Error('generateNameMaps expected array of Machine objects');
+  if (typeof offset !== 'number') throw new Error('generateNameMaps expected offset to be a number');
+  let index = offset;
+  const nameMaps = machines.map((machine) => {
+    const nameMap = {};
+    const states = machine.getStates();
+    states.forEach((oldName) => {
+      nameMap[oldName] = `q${index}`;
+      index += 1;
+    });
+    return nameMap;
   });
+  return nameMaps;
+}
+
+export function replaceStateWithMachine(patientMachine, stateToReplace, replacementMachine) {
+  const [nameMap] = generateNameMaps([replacementMachine], patientMachine.getStates().length);
   Object.keys(nameMap).forEach((state) => {
     patientMachine.addState(nameMap[state]);
   });
@@ -97,16 +109,7 @@ export function replaceStateWithMachine(patientMachine, stateToReplace, replacem
 }
 
 export function joinMachines(machine1, machine2) {
-  const nameMap1 = {};
-  const nameMap2 = {};
-  machine1.getStates().forEach((state) => {
-    const index = Object.keys(nameMap1).length + Object.keys(nameMap2).length;
-    nameMap1[state] = `q${index}`;
-  });
-  machine2.getStates().forEach((state) => {
-    const index = Object.keys(nameMap1).length + Object.keys(nameMap2).length;
-    nameMap2[state] = `q${index}`;
-  });
+  const [nameMap1, nameMap2] = generateNameMaps([machine1, machine2]);
 
   const states = []
     .concat(Object.keys(nameMap1).map((oldName) => nameMap1[oldName]))
