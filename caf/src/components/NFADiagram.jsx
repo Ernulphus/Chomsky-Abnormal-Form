@@ -249,6 +249,14 @@ function NFADiagram() {
     delete stateCoords[selected];
   };
 
+  const handleKeyDown = (e) => {
+    if (e.code === 'Delete') {
+      machine.deleteState(selected);
+      delete stateCoords[selected];
+      setSelected(null);
+    }
+  };
+
   const handleContextMenu = (e) => {
     e.preventDefault();
   };
@@ -276,6 +284,7 @@ function NFADiagram() {
           onMouseMove={handleMouseMove}
           onContextMenu={handleContextMenu}
           onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
         />
         <div className="nfa-diagram-word-input-box">
           <input placeholder="Enter a word here..." onChange={updateWord} />

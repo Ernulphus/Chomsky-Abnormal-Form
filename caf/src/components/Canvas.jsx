@@ -8,6 +8,7 @@ function Canvas({
   onMouseMove,
   onContextMenu,
   onKeyPress,
+  onKeyDown,
 }) {
   const canvasRef = useRef(null);
 
@@ -39,6 +40,7 @@ function Canvas({
       onMouseMove={onMouseMove}
       onContextMenu={onContextMenu}
       onKeyPress={onKeyPress}
+      onKeyDown={onKeyDown}
     />
   );
 }
@@ -51,4 +53,5 @@ Canvas.propTypes = {
   onMouseMove: PropTypes.func.isRequired,
   onContextMenu: PropTypes.func.isRequired,
   onKeyPress: PropTypes.func.isRequired,
+  onKeyDown: PropTypes.func.isRequired,
 };
