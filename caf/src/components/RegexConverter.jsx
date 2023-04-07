@@ -138,7 +138,7 @@ export function joinMachines(machine1, machine2) {
           transitionFunction[newStateFrom][letter] = newStatesTo;
           return;
         }
-        transitionFunction[newStateFrom][letter] =
+        // transitionFunction[newStateFrom][letter] =
         transitionFunction[newStateFrom][letter].concat(newStatesTo);
       });
     });

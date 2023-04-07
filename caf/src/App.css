@@ -79,3 +79,10 @@ input:hover, button:hover {
 table, tr, th, td {
   border: 1px solid black;
 }
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
