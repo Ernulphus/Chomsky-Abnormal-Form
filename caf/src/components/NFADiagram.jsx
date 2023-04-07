@@ -39,7 +39,7 @@ function generateInitialCoordinates(states) {
   const coordinates = {};
   let xOffset = 0;
   let yOffset = 1;
-  const spaceBetween = 75;
+  const spaceBetween = 100;
   states.forEach((state) => {
     coordinates[state] = [(xOffset + 1) * spaceBetween, yOffset * spaceBetween];
     xOffset += 1;
