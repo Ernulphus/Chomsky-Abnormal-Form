@@ -1,7 +1,7 @@
 # hunter-codefest-2022-chomsky-abnormal-form
 
 ## Boaz Kaufman - Ernulphus  
-## Sam Ebersole - AVespaIsNotAMotorCycle  
+## Sasha Ebersole - AVespaIsNotAMotorCycle  
   
 ### Idea: create an app similar to [Evan Wallace's FSM designer](https://madebyevan.com/fsm/) that the user can actually run.  
 
